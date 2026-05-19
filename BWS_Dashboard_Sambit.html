@@ -1,0 +1,2105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440">
+<title>BWS Operations Dashboard – Sambit Saha</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+
+/* ─── RESET ────────────────────────────────────────────── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ─── TOKENS ───────────────────────────────────────────── */
+:root {
+  --navy:        #1B3461;
+  --navy-mid:    #243F72;
+  --navy-light:  #2E4E88;
+  --orange:      #F5A623;
+  --orange-dark: #D4891A;
+  --orange-pale: #FFF6E5;
+  --bg:          #EEF1F7;
+  --white:       #FFFFFF;
+  --card-shadow: 0 2px 14px rgba(27,52,97,.10);
+  --text:        #1B3461;
+  --muted:       #6B82A3;
+  --dim:         #A8BDCF;
+  --border:      #DDE5F0;
+  --r:           14px;
+}
+
+body {
+  background: var(--bg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── APP SHELL ────────────────────────────────────────── */
+.app {
+  display: flex;
+  width: 1440px;
+  min-height: 100vh;
+  margin: 0 auto;
+}
+
+/* ─── LEFT SIDEBAR ─────────────────────────────────────── */
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--navy);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 36px 0 28px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.avatar-ring {
+  width: 90px; height: 90px;
+  border-radius: 50%;
+  background: var(--navy-mid);
+  border: 3px solid rgba(255,255,255,.18);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 18px;
+  flex-shrink: 0;
+}
+
+.avatar-ring svg { width: 52px; height: 52px; }
+
+.sb-name {
+  font-size: 16px;
+  font-weight: 800;
+  color: #FFFFFF;
+  text-align: center;
+  letter-spacing: .5px;
+  margin-bottom: 5px;
+}
+
+.sb-role {
+  font-size: 10px;
+  color: rgba(255,255,255,.55);
+  text-align: center;
+  font-weight: 500;
+  margin-bottom: 36px;
+  line-height: 1.5;
+  padding: 0 20px;
+}
+
+.sb-divider {
+  width: 160px;
+  height: 1px;
+  background: rgba(255,255,255,.1);
+  margin-bottom: 22px;
+}
+
+.nav { width: 100%; padding: 0 18px; display: flex; flex-direction: column; gap: 4px; }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  color: rgba(255,255,255,.55);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .18s;
+  user-select: none;
+}
+
+.nav-item:hover { background: rgba(255,255,255,.08); color: rgba(255,255,255,.85); }
+
+.nav-item.active {
+  background: rgba(245,166,35,.18);
+  color: var(--orange);
+  font-weight: 700;
+}
+
+.nav-item .ni { font-size: 15px; width: 20px; text-align: center; }
+
+.sb-footer {
+  margin-top: auto;
+  font-size: 9px;
+  color: rgba(255,255,255,.25);
+  text-align: center;
+  padding: 0 16px;
+  line-height: 1.7;
+  letter-spacing: .3px;
+}
+
+/* ─── MAIN ─────────────────────────────────────────────── */
+.main {
+  flex: 1;
+  padding: 28px 28px 32px;
+  overflow-x: hidden;
+}
+
+/* ─── MAIN HEADER ──────────────────────────────────────── */
+.mhdr {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.mhdr-title { font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -.3px; }
+.mhdr-sub   { font-size: 11px; color: var(--muted); margin-top: 4px; font-weight: 400; }
+
+.mhdr-menu {
+  width: 38px; height: 38px;
+  border-radius: 8px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  cursor: pointer; box-shadow: var(--card-shadow);
+}
+
+.mhdr-menu span {
+  display: block; width: 18px; height: 2px; background: var(--navy); border-radius: 2px;
+}
+
+/* ─── KPI STRIP ────────────────────────────────────────── */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.kpi-card {
+  background: var(--white);
+  border-radius: var(--r);
+  padding: 20px 22px 18px;
+  box-shadow: var(--card-shadow);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-card.featured {
+  background: var(--navy);
+  color: white;
+}
+
+.kpi-card.featured .kpi-lbl { color: rgba(255,255,255,.6); }
+.kpi-card.featured .kpi-val { color: #FFFFFF; }
+.kpi-card.featured .kpi-icon-circle { background: rgba(255,255,255,.12); }
+.kpi-card.featured .kpi-icon-circle svg path,
+.kpi-card.featured .kpi-icon-circle svg circle,
+.kpi-card.featured .kpi-icon-circle svg rect { stroke: rgba(255,255,255,.85); }
+.kpi-card.featured .kpi-sub { color: rgba(255,255,255,.45); }
+
+.kpi-body {}
+.kpi-lbl  { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 8px; }
+.kpi-val  { font-size: 34px; font-weight: 900; color: var(--navy); line-height: 1; letter-spacing: -1px; margin-bottom: 6px; }
+.kpi-val .sup { font-size: 18px; letter-spacing: 0; }
+.kpi-sub  { font-size: 10px; color: var(--muted); font-weight: 400; line-height: 1.45; }
+
+.kpi-icon-circle {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: var(--orange-pale);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.kpi-icon-circle.ic { background: rgba(27,52,97,.08); }
+
+/* Orange dot on KPI val for featured */
+.kpi-card.featured .kpi-val { color: var(--orange); }
+
+/* ─── BODY ROW 1 ───────────────────────────────────────── */
+.row1 {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+/* ─── CARDS ────────────────────────────────────────────── */
+.card {
+  background: var(--white);
+  border-radius: var(--r);
+  padding: 20px 22px;
+  box-shadow: var(--card-shadow);
+}
+
+.card-hdr {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.card-title { font-size: 13px; font-weight: 700; color: var(--text); }
+.card-sub   { font-size: 10px; color: var(--muted); margin-top: 3px; font-weight: 400; }
+
+.chip {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.chip.orange { background: var(--orange); color: #fff; }
+.chip.outline { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+
+/* ─── BAR CHART LEGEND ─────────────────────────────────── */
+.chart-legend {
+  display: flex;
+  gap: 18px;
+  margin-top: 10px;
+}
+
+.leg { display: flex; align-items: center; gap: 6px; }
+.leg-dot { width: 10px; height: 10px; border-radius: 3px; }
+.leg-txt { font-size: 10.5px; color: var(--muted); font-weight: 500; }
+
+/* ─── DONUT PANEL ──────────────────────────────────────── */
+.donut-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.donut-svg-wrap { position: relative; width: 150px; height: 150px; margin: 0 auto 16px; }
+
+.donut-center {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  text-align: center;
+}
+
+.dc-val { font-size: 24px; font-weight: 900; color: var(--navy); line-height: 1; }
+.dc-lbl { font-size: 9px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .6px; margin-top: 3px; }
+
+.donut-list { width: 100%; display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+
+.di { display: flex; align-items: center; gap: 8px; }
+.di-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.di-lbl { font-size: 11px; color: var(--text); flex: 1; font-weight: 500; }
+.di-val { font-size: 11px; font-weight: 700; color: var(--text); }
+
+.btn-orange {
+  width: 100%;
+  padding: 10px 16px;
+  background: var(--orange);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: .3px;
+  transition: background .18s;
+}
+
+.btn-orange:hover { background: var(--orange-dark); }
+
+/* ─── BODY ROW 2 ───────────────────────────────────────── */
+.row2 {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+}
+
+/* ─── AREA BOTTOM SECTION ──────────────────────────────── */
+.area-wrap {
+  display: grid;
+  grid-template-columns: 1fr 200px;
+  gap: 16px;
+}
+
+/* ─── CID CARD (right bottom) ──────────────────────────── */
+.cid-list { display: flex; flex-direction: column; gap: 10px; }
+
+.cid-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.cid-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.cid-title { font-size: 11.5px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.cid-desc  { font-size: 10px; color: var(--muted); line-height: 1.5; }
+
+.cid-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--navy);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 14px;
+  width: 100%;
+  justify-content: center;
+}
+
+/* ─── MINI STAT CARD ───────────────────────────────────── */
+.mini-stats { display: flex; flex-direction: column; gap: 12px; }
+
+.ms-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.ms-label { font-size: 10.5px; color: var(--muted); font-weight: 500; }
+.ms-val   { font-size: 13px; font-weight: 800; }
+
+/* ─── CID MONTH HIGHLIGHT TOOLTIP ─────────────────────── */
+.cid-tooltip {
+  background: var(--navy);
+  color: white;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 5px;
+  text-anchor: middle;
+}
+
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!--   SIDEBAR                                      -->
+  <!-- ══════════════════════════════════════════════ -->
+  <aside class="sidebar">
+
+    <div class="avatar-ring">
+      <!-- Person SVG icon -->
+      <svg viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="26" cy="18" r="10" stroke="rgba(255,255,255,0.85)" stroke-width="2.5"/>
+        <path d="M6 46c0-11.046 8.954-20 20-20s20 8.954 20 20" stroke="rgba(255,255,255,0.85)" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+    <div class="sb-name">SAMBIT SAHA</div>
+    <div class="sb-role">Brainwave Science<br>Neurotechnology Operations</div>
+    <div class="sb-divider"></div>
+
+    <nav class="nav">
+      <div class="nav-item">
+        <span class="ni">🏠</span> Overview
+      </div>
+      <div class="nav-item active">
+        <span class="ni">🧠</span> iCognative
+      </div>
+      <div class="nav-item">
+        <span class="ni">🔍</span> Kolkata CID
+      </div>
+      <div class="nav-item">
+        <span class="ni">📍</span> Field Operations
+      </div>
+      <div class="nav-item">
+        <span class="ni">📦</span> Logistics
+      </div>
+      <div class="nav-item">
+        <span class="ni">📊</span> Reports
+      </div>
+    </nav>
+
+
+  </aside>
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!--   MAIN CONTENT                                 -->
+  <!-- ══════════════════════════════════════════════ -->
+  <main class="main">
+
+    <!-- HEADER -->
+    <div class="mhdr">
+      <div>
+        <div class="mhdr-title">Operations Dashboard</div>
+        <div class="mhdr-sub">iCognative Priority View &nbsp;·&nbsp; Sambit Saha &nbsp;·&nbsp; June 2025 – May 2026</div>
+      </div>
+      <div class="mhdr-menu"><span></span><span></span><span></span></div>
+    </div>
+
+    <!-- ── KPI STRIP ─────────────────────────────── -->
+    <div class="kpi-strip">
+
+      <!-- Featured: iCognative (navy bg) -->
+      <div class="kpi-card featured">
+        <div class="kpi-body">
+          <div class="kpi-lbl">iCognative Tests</div>
+          <div class="kpi-val">1,300<span class="sup">+</span></div>
+          <div class="kpi-sub">Stage · QA · Production · Kolkata Domain</div>
+        </div>
+        <div class="kpi-icon-circle">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <circle cx="11" cy="11" r="8" stroke="rgba(255,255,255,.85)" stroke-width="2"/>
+            <path d="M7 11 Q11 6 15 11 Q11 16 7 11Z" fill="rgba(255,255,255,.75)"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Calm Sync -->
+      <div class="kpi-card">
+        <div class="kpi-body">
+          <div class="kpi-lbl">Calm Sync Sessions</div>
+          <div class="kpi-val" style="color:var(--orange)">500<span class="sup">+</span></div>
+          <div class="kpi-sub">Web · Android · iOS platforms</div>
+        </div>
+        <div class="kpi-icon-circle">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M4 11 Q7 4 11 11 Q15 18 18 11" stroke="#F5A623" stroke-width="2" stroke-linecap="round" fill="none"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- iCognative Mini -->
+      <div class="kpi-card">
+        <div class="kpi-body">
+          <div class="kpi-lbl">iCognative Mini</div>
+          <div class="kpi-val" style="color:var(--navy)">50<span class="sup">+</span></div>
+          <div class="kpi-sub">Web &amp; Android validated</div>
+        </div>
+        <div class="kpi-icon-circle ic">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <rect x="4" y="6" width="14" height="10" rx="2" stroke="#1B3461" stroke-width="2"/>
+            <path d="M8 10h6M8 13h4" stroke="#1B3461" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- My I'd -->
+      <div class="kpi-card">
+        <div class="kpi-body">
+          <div class="kpi-lbl">My I'd Sessions</div>
+          <div class="kpi-val" style="color:#4A7EBB">50<span class="sup">+</span></div>
+          <div class="kpi-sub">Protocol execution &amp; data collection</div>
+        </div>
+        <div class="kpi-icon-circle" style="background:#EEF4FF">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <circle cx="11" cy="9" r="4" stroke="#4A7EBB" stroke-width="2"/>
+            <path d="M4 19c0-3.866 3.134-7 7-7h0c3.866 0 7 3.134 7 7" stroke="#4A7EBB" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+    </div><!-- /kpi-strip -->
+
+    <!-- ── ROW 1: Bar Chart + Donut ──────────────── -->
+    <div class="row1">
+
+      <!-- BAR CHART CARD -->
+      <div class="card">
+        <div class="card-hdr">
+          <div>
+            <div class="card-title">Monthly iCognative Activity</div>
+            <div class="card-sub">iCognative tests per month &nbsp;·&nbsp; Navy = iCognative &nbsp;·&nbsp; Orange = Calm Sync &nbsp;·&nbsp; 📍 Sep 2025 = Kolkata CID Deployment</div>
+          </div>
+          <span class="chip orange">Check Now</span>
+        </div>
+
+        <!-- SVG BAR CHART -->
+        <!--
+          Chart area: x: 40→598 (w=558), y: 18→162 (h=144)
+          12 groups, group_w = 558/12 = 46.5
+          2 bars per group: navy(ic) + orange(cs)
+          bar_w = 14px, gap = 3px, total = 31px, side_pad = 7.75
+
+          Scales: ic_h = value/220 * 138  |  cs_h = value/62 * 65 (capped)
+          bar base y = 162, top = 162 - h
+        -->
+        <svg width="100%" viewBox="0 0 640 190" xmlns="http://www.w3.org/2000/svg">
+
+          <!-- Y-axis guide lines + labels -->
+          <line x1="40" y1="18"  x2="610" y2="18"  stroke="#EEF1F7" stroke-width="1"/>
+          <line x1="40" y1="54"  x2="610" y2="54"  stroke="#EEF1F7" stroke-width="1"/>
+          <line x1="40" y1="90"  x2="610" y2="90"  stroke="#EEF1F7" stroke-width="1"/>
+          <line x1="40" y1="126" x2="610" y2="126" stroke="#EEF1F7" stroke-width="1"/>
+          <line x1="40" y1="162" x2="610" y2="162" stroke="#DDE5F0" stroke-width="1"/>
+
+          <text x="32" y="22"  text-anchor="end" font-size="9" fill="#A8BDCF" font-family="Inter,sans-serif">220</text>
+          <text x="32" y="58"  text-anchor="end" font-size="9" fill="#A8BDCF" font-family="Inter,sans-serif">165</text>
+          <text x="32" y="94"  text-anchor="end" font-size="9" fill="#A8BDCF" font-family="Inter,sans-serif">110</text>
+          <text x="32" y="130" text-anchor="end" font-size="9" fill="#A8BDCF" font-family="Inter,sans-serif">55</text>
+          <text x="32" y="165" text-anchor="end" font-size="9" fill="#A8BDCF" font-family="Inter,sans-serif">0</text>
+
+          <!-- ── Jun 2025 – iC=38 cs=51 ── -->
+          <rect x="47"  y="137.2" width="14" height="24.8"  fill="#1B3461" rx="2"/>
+          <rect x="64"  y="109.5" width="14" height="52.5"  fill="#F5A623" rx="2" opacity=".85"/>
+          <text x="63"  y="178" text-anchor="middle" font-size="8.5" fill="#A8BDCF" font-family="Inter,sans-serif">Jun</text>
+          <text x="63"  y="188" text-anchor="middle" font-size="7.5" fill="#C8D4E0" font-family="Inter,sans-serif">2025</text>
+
+          <!-- ── Jul 2025 – iC=91 cs=7 ── -->
+          <rect x="93"  y="104.6" width="14" height="57.4"  fill="#1B3461" rx="2"/>
+          <rect x="110" y="154.7" width="14" height="7.3"   fill="#F5A623" rx="2" opacity=".85"/>
+          <text x="109" y="178" text-anchor="middle" font-size="8.5" fill="#A8BDCF" font-family="Inter,sans-serif">Jul</text>
+
+          <!-- ── Aug 2025 – iC=37 cs=3 ── -->
+          <rect x="139" y="138.8" width="14" height="23.2"  fill="#1B3461" rx="2"/>
+          <rect x="156" y="158.9" width="14" height="3.1"   fill="#F5A623" rx="2" opacity=".85"/>
+          <text x="155" y="178" text-anchor="middle" font-size="8.5" fill="#A8BDCF" font-family="Inter,sans-serif">Aug</text>
+
+          <!-- ── Sep 2025 – iC=159 cs=0 ── KOLKATA CID ── -->
+          <!-- Highlight background -->
+          <rect x="183" y="10" width="50" height="158" fill="rgba(245,166,35,.07)" rx="4"/>
+          <rect x="185" y="62.4"  width="14" height="99.6"  fill="#1B3461" rx="2"/>
+          <!-- CID label above bar -->
+          <rect x="175" y="36" width="64" height="18" rx="4" fill="#1B3461"/>
+          <text x="207" y="48.5" text-anchor="middle" font-size="8.5" fill="#F5A623" font-weight="700" font-family="Inter,sans-serif">Kolkata CID</text>
+          <text x="201" y="178" text-anchor="middle" font-size="8.5" fill="#1B3461" font-weight="700" font-family="Inter,sans-serif">Sep</text>
+          <text x="201" y="188" text-anchor="middle" font-size="7.5" fill="#C8D4E0" font-family="Inter,sans-serif">2025</text>
+
+          <!-- ── Oct 2025 – iC=19 cs=8 ── -->
+          <rect x="231" y="149.5" width="14" height="12.5"  fill="#1B3461" rx="2"/>
+          <rect x="248" y="153.6" width="14" height="8.4"   fill="#F5A623" rx="2" opacity=".85"/>
+          <text x="247" y="178" text-anchor="middle" font-size="8.5" fill="#A8BDCF" font-family="Inter,sans-serif">Oct</text>
+
+          <!-- ── Nov 2025 – iC=129 cs=52 ── -->
+          <rect x="277" y="81.2"  width="14" height="80.8"  fill="#1B3461" rx="2"/>
+          <rect x="294" y="108.5" width="14" height="53.5"  fill="#F5A623" rx="2" opacity=".85"/>
+          <text x="293" y="178" text-anchor="middle" font-size="8.5" fill="#A8BDCF" font-family="Inter,sans-serif">Nov</text>
+
+          <!-- ── Dec 2025 – iC=123 cs=28 ── -->
+          <rect x="323" y="84.9"  width="14" height="77.1"  fill="#1B3461" rx="2"/>
+          <rect x="340" y="133.7" width="14" height="28.3"  fill="#F5A623" rx="2" opacity=".85"/>
+          <text x="339" y="178" text-anchor="middle" font-size="8.5" fill="#A8BDCF" font-family="Inter,sans-serif">Dec</text>
+          <text x="339" y="188" text-anchor="middle" font-size="7.5" fill="#C8D4E0" font-family="Inter,sans-serif">2025</text>
+
+          <!-- ── Jan 2026 – iC=219 cs=24 ── PEAK ── -->
+          <rect x="369" y="24.5"  width="14" height="137.5" fill="#1B3461" rx="2"/>
+          <rect x="386" y="137.3" width="14" height="24.7"  fill="#F5A623" rx="2" opacity=".85"/>
+          <text x="385" y="178" text-anchor="middle" font-size="8.5" fill="#A8BDCF" font-family="Inter,sans-serif">Jan</text>
+          <text x="385" y="188" text-anchor="middle" font-size="7.5" fill="#C8D4E0" font-family="Inter,sans-serif">2026</text>
+
+          <!-- ── Feb 2026 – iC=175 cs=32 ── -->
+          <rect x="415" y="52.2"  width="14" height="109.8" fill="#1B3461" rx="2"/>
+          <rect x="432" y="129.4" width="14" height="32.6"  fill="#F5A623" rx="2" opacity=".85"/>
+          <text x="431" y="178" text-anchor="middle" font-size="8.5" fill="#A8BDCF" font-family="Inter,sans-serif">Feb</text>
+
+          <!-- ── Mar 2026 – iC=147 cs=62 ── -->
+          <rect x="461" y="69.9"  width="14" height="92.1"  fill="#1B3461" rx="2"/>
+          <rect x="478" y="97.0"  width="14" height="65.0"  fill="#F5A623" rx="2" opacity=".85"/>
+          <text x="477" y="178" text-anchor="middle" font-size="8.5" fill="#A8BDCF" font-family="Inter,sans-serif">Mar</text>
+
+          <!-- ── Apr 2026 – iC=171 cs=25 ── -->
+          <rect x="507" y="55.5"  width="14" height="106.5" fill="#1B3461" rx="2"/>
+          <rect x="524" y="136.8" width="14" height="25.2"  fill="#F5A623" rx="2" opacity=".85"/>
+          <text x="523" y="178" text-anchor="middle" font-size="8.5" fill="#A8BDCF" font-family="Inter,sans-serif">Apr</text>
+
+          <!-- ── May 2026 – iC=77 cs=30 ── -->
+          <rect x="553" y="113.7" width="14" height="48.3"  fill="#1B3461" rx="2"/>
+          <rect x="570" y="131.3" width="14" height="30.7"  fill="#F5A623" rx="2" opacity=".85"/>
+          <text x="569" y="178" text-anchor="middle" font-size="8.5" fill="#A8BDCF" font-family="Inter,sans-serif">May</text>
+          <text x="569" y="188" text-anchor="middle" font-size="7.5" fill="#C8D4E0" font-family="Inter,sans-serif">2026</text>
+
+        </svg>
+
+        <div class="chart-legend">
+          <div class="leg"><div class="leg-dot" style="background:#1B3461"></div><div class="leg-txt">iCognative Tests</div></div>
+          <div class="leg"><div class="leg-dot" style="background:#F5A623"></div><div class="leg-txt">Calm Sync Sessions</div></div>
+          <div class="leg"><div class="leg-dot" style="background:rgba(245,166,35,.25);border:1px solid var(--orange)"></div><div class="leg-txt">📍 Sep 2025 = Kolkata CID Deployment</div></div>
+        </div>
+      </div><!-- /bar chart card -->
+
+      <!-- DONUT CARD -->
+      <div class="card donut-panel">
+        <div class="card-hdr" style="width:100%">
+          <div>
+            <div class="card-title">Full Activity Distribution</div>
+            <div class="card-sub">All 7 activities · June 2025 – May 2026 · Total 2,302</div>
+          </div>
+        </div>
+
+        <!--
+          Total = 2302 · r=62 · circumference = 2π×62 = 389.557
+          iCognative  1300 56.5% → dash 217.5  offset 0
+          Calm Sync    500 21.7% → dash  82.1  offset -220.0
+          Annotations  341 14.8% → dash  55.2  offset -304.6
+          iC Mini       50  2.2% → dash   7.0  offset -362.3
+          My I'd        50  2.2% → dash   7.0  offset -370.8
+          Brain ID      29  1.3% → dash   3.9  offset -379.3
+          Depression    32  1.4% → dash   4.4  offset -384.2
+        -->
+        <div class="donut-svg-wrap" style="width:175px;height:175px;margin:0 auto 12px">
+          <svg width="175" height="175" viewBox="0 0 175 175">
+            <!-- Track -->
+            <circle cx="87.5" cy="87.5" r="62" fill="none" stroke="#EEF1F7" stroke-width="26"/>
+
+            <!-- 1 · iCognative navy 56.5% — thicker = dominant -->
+            <circle cx="87.5" cy="87.5" r="62" fill="none" stroke="#1B3461" stroke-width="26"
+              stroke-dasharray="217.5 172.1" stroke-dashoffset="0"
+              transform="rotate(-90 87.5 87.5)"/>
+
+            <!-- 2 · Calm Sync orange 21.7% -->
+            <circle cx="87.5" cy="87.5" r="62" fill="none" stroke="#F5A623" stroke-width="20"
+              stroke-dasharray="82.1 307.5" stroke-dashoffset="-220.0"
+              transform="rotate(-90 87.5 87.5)"/>
+
+            <!-- 3 · Annotations steel-blue 14.8% -->
+            <circle cx="87.5" cy="87.5" r="62" fill="none" stroke="#2980B9" stroke-width="20"
+              stroke-dasharray="55.2 334.4" stroke-dashoffset="-304.6"
+              transform="rotate(-90 87.5 87.5)"/>
+
+            <!-- 4 · iC Mini light-blue 2.2% -->
+            <circle cx="87.5" cy="87.5" r="62" fill="none" stroke="#4A7EBB" stroke-width="20"
+              stroke-dasharray="7.0 382.6" stroke-dashoffset="-362.3"
+              transform="rotate(-90 87.5 87.5)"/>
+
+            <!-- 5 · My I'd silver 2.2% -->
+            <circle cx="87.5" cy="87.5" r="62" fill="none" stroke="#A8BDCF" stroke-width="20"
+              stroke-dasharray="7.0 382.6" stroke-dashoffset="-370.8"
+              transform="rotate(-90 87.5 87.5)"/>
+
+            <!-- 6 · Brain ID green 1.3% -->
+            <circle cx="87.5" cy="87.5" r="62" fill="none" stroke="#27AE60" stroke-width="20"
+              stroke-dasharray="3.9 385.7" stroke-dashoffset="-379.3"
+              transform="rotate(-90 87.5 87.5)"/>
+
+            <!-- 7 · Depression purple 1.4% -->
+            <circle cx="87.5" cy="87.5" r="62" fill="none" stroke="#9B59B6" stroke-width="20"
+              stroke-dasharray="4.4 385.2" stroke-dashoffset="-384.2"
+              transform="rotate(-90 87.5 87.5)"/>
+
+            <!-- Callout: iCognative arc midpoint at ~11.6° from horizontal -->
+            <!-- r-outer=75.5 → x=87.5+75.5×cos(-78.4°)=87.5+14.9=102, y=87.5+75.5×sin(-78.4°)=87.5-74=13.5 -->
+            <line x1="102" y1="22" x2="102" y2="36" stroke="#1B3461" stroke-width="1.5" stroke-linecap="round"/>
+            <rect x="82" y="7" width="40" height="17" rx="8.5" fill="#1B3461"/>
+            <text x="102" y="15.5" text-anchor="middle" dominant-baseline="middle"
+              font-size="9" font-weight="800" fill="white" font-family="Inter,sans-serif">56% ★</text>
+          </svg>
+          <div class="donut-center">
+            <div class="dc-val" style="font-size:19px;letter-spacing:-.5px">2,302</div>
+            <div class="dc-lbl">All Activities</div>
+          </div>
+        </div>
+
+        <!-- 7-item legend — compact -->
+        <div class="donut-list" style="gap:7px">
+          <div class="di">
+            <div class="di-dot" style="background:#1B3461;width:9px;height:9px;border-radius:2px"></div>
+            <div class="di-lbl" style="font-size:10.5px">iCognative</div>
+            <div style="font-size:9.5px;color:var(--muted);font-weight:600;margin-right:5px">56%</div>
+            <div class="di-val" style="font-size:11px">1,300</div>
+          </div>
+          <div class="di">
+            <div class="di-dot" style="background:#F5A623;width:9px;height:9px;border-radius:2px"></div>
+            <div class="di-lbl" style="font-size:10.5px">Calm Sync</div>
+            <div style="font-size:9.5px;color:var(--muted);font-weight:600;margin-right:5px">22%</div>
+            <div class="di-val" style="font-size:11px">500</div>
+          </div>
+          <div class="di">
+            <div class="di-dot" style="background:#2980B9;width:9px;height:9px;border-radius:2px"></div>
+            <div class="di-lbl" style="font-size:10.5px">Annotations</div>
+            <div style="font-size:9.5px;color:var(--muted);font-weight:600;margin-right:5px">15%</div>
+            <div class="di-val" style="font-size:11px">341</div>
+          </div>
+          <div class="di">
+            <div class="di-dot" style="background:#4A7EBB;width:9px;height:9px;border-radius:2px"></div>
+            <div class="di-lbl" style="font-size:10.5px">iCognative Mini</div>
+            <div style="font-size:9.5px;color:var(--muted);font-weight:600;margin-right:5px">2%</div>
+            <div class="di-val" style="font-size:11px">50</div>
+          </div>
+          <div class="di">
+            <div class="di-dot" style="background:#A8BDCF;width:9px;height:9px;border-radius:2px"></div>
+            <div class="di-lbl" style="font-size:10.5px">My I'd Sessions</div>
+            <div style="font-size:9.5px;color:var(--muted);font-weight:600;margin-right:5px">2%</div>
+            <div class="di-val" style="font-size:11px">50</div>
+          </div>
+          <div class="di">
+            <div class="di-dot" style="background:#27AE60;width:9px;height:9px;border-radius:2px"></div>
+            <div class="di-lbl" style="font-size:10.5px">Brain ID</div>
+            <div style="font-size:9.5px;color:var(--muted);font-weight:600;margin-right:5px">1%</div>
+            <div class="di-val" style="font-size:11px">29</div>
+          </div>
+          <div class="di">
+            <div class="di-dot" style="background:#9B59B6;width:9px;height:9px;border-radius:2px"></div>
+            <div class="di-lbl" style="font-size:10.5px">Depression Tests</div>
+            <div style="font-size:9.5px;color:var(--muted);font-weight:600;margin-right:5px">1%</div>
+            <div class="di-val" style="font-size:11px">32</div>
+          </div>
+        </div>
+
+        <button class="btn-orange">View Full Report</button>
+
+      </div><!-- /donut card -->
+
+    </div><!-- /row1 -->
+
+    <!-- ── ROW 2: Area Trend + CID Card ──────────── -->
+    <div class="row2">
+
+      <!-- AREA CHART CARD -->
+      <div class="card">
+        <div class="card-hdr">
+          <div>
+            <div class="card-title">Testing Trend &nbsp;·&nbsp; Jun 2025 – May 2026</div>
+            <div class="card-sub">Monthly iCognative (navy) and Calm Sync (orange) testing volume</div>
+          </div>
+        </div>
+
+        <div class="area-wrap">
+
+          <!-- AREA SVG -->
+          <!--
+            x: 0→580, y: 0→120, base=120
+            12 points, x-step = 52.7
+            iC scale: value/220 * 105   CS scale: value/62 * 60
+            iC points: (0,102.7)(52.7,78.7)(105.5,103.2)(158.2,47.8)(210.9,111.4)(263.6,61.4)(316.4,64.1)(369.1,20.6)(421.8,40.5)(474.5,53.2)(527.3,42.3)(580,85)
+            CS points: (0,70.6)(52.7,113.2)(105.5,117.1)(158.2,120)(210.9,112.3)(263.6,61)(316.4,92.9)(369.1,96.8)(421.8,89)(474.5,60)(527.3,95.8)(580,91)
+          -->
+          <svg width="100%" viewBox="0 0 580 135" xmlns="http://www.w3.org/2000/svg">
+
+            <!-- CS area (orange, behind) -->
+            <path d="M 0,70.6 L 52.7,113.2 L 105.5,117.1 L 158.2,120 L 210.9,112.3 L 263.6,61 L 316.4,92.9 L 369.1,96.8 L 421.8,89 L 474.5,60 L 527.3,95.8 L 580,91 L 580,120 L 0,120 Z"
+              fill="rgba(245,166,35,.18)" stroke="none"/>
+            <path d="M 0,70.6 L 52.7,113.2 L 105.5,117.1 L 158.2,120 L 210.9,112.3 L 263.6,61 L 316.4,92.9 L 369.1,96.8 L 421.8,89 L 474.5,60 L 527.3,95.8 L 580,91"
+              fill="none" stroke="#F5A623" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+            <!-- iC area (navy, front) -->
+            <path d="M 0,102.7 L 52.7,78.7 L 105.5,103.2 L 158.2,47.8 L 210.9,111.4 L 263.6,61.4 L 316.4,64.1 L 369.1,20.6 L 421.8,40.5 L 474.5,53.2 L 527.3,42.3 L 580,85 L 580,120 L 0,120 Z"
+              fill="rgba(27,52,97,.18)" stroke="none"/>
+            <path d="M 0,102.7 L 52.7,78.7 L 105.5,103.2 L 158.2,47.8 L 210.9,111.4 L 263.6,61.4 L 316.4,64.1 L 369.1,20.6 L 421.8,40.5 L 474.5,53.2 L 527.3,42.3 L 580,85"
+              fill="none" stroke="#1B3461" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+            <!-- Kolkata CID marker at Sep (x=158.2) -->
+            <circle cx="158.2" cy="47.8" r="5" fill="#F5A623" stroke="#1B3461" stroke-width="2"/>
+            <rect x="130" y="24" width="57" height="17" rx="4" fill="#1B3461"/>
+            <text x="158" y="36" text-anchor="middle" font-size="8" fill="#F5A623" font-weight="700" font-family="Inter,sans-serif">Kolkata CID</text>
+            <line x1="158.2" y1="41" x2="158.2" y2="47.8" stroke="#1B3461" stroke-width="1.5"/>
+
+            <!-- Jan peak marker -->
+            <circle cx="369.1" cy="20.6" r="5" fill="#1B3461" stroke="white" stroke-width="2"/>
+            <text x="369.1" y="15" text-anchor="middle" font-size="8" fill="#1B3461" font-weight="700" font-family="Inter,sans-serif">Peak 219</text>
+
+            <!-- Month labels on x-axis -->
+            <text x="0"     y="132" text-anchor="middle" font-size="8" fill="#A8BDCF" font-family="Inter,sans-serif">Jun</text>
+            <text x="52.7"  y="132" text-anchor="middle" font-size="8" fill="#A8BDCF" font-family="Inter,sans-serif">Jul</text>
+            <text x="105.5" y="132" text-anchor="middle" font-size="8" fill="#A8BDCF" font-family="Inter,sans-serif">Aug</text>
+            <text x="158.2" y="132" text-anchor="middle" font-size="8" fill="#F5A623" font-weight="700" font-family="Inter,sans-serif">Sep</text>
+            <text x="210.9" y="132" text-anchor="middle" font-size="8" fill="#A8BDCF" font-family="Inter,sans-serif">Oct</text>
+            <text x="263.6" y="132" text-anchor="middle" font-size="8" fill="#A8BDCF" font-family="Inter,sans-serif">Nov</text>
+            <text x="316.4" y="132" text-anchor="middle" font-size="8" fill="#A8BDCF" font-family="Inter,sans-serif">Dec</text>
+            <text x="369.1" y="132" text-anchor="middle" font-size="8" fill="#A8BDCF" font-family="Inter,sans-serif">Jan</text>
+            <text x="421.8" y="132" text-anchor="middle" font-size="8" fill="#A8BDCF" font-family="Inter,sans-serif">Feb</text>
+            <text x="474.5" y="132" text-anchor="middle" font-size="8" fill="#A8BDCF" font-family="Inter,sans-serif">Mar</text>
+            <text x="527.3" y="132" text-anchor="middle" font-size="8" fill="#A8BDCF" font-family="Inter,sans-serif">Apr</text>
+            <text x="580"   y="132" text-anchor="middle" font-size="8" fill="#A8BDCF" font-family="Inter,sans-serif">May</text>
+
+            <!-- Baseline -->
+            <line x1="0" y1="120" x2="580" y2="120" stroke="#DDE5F0" stroke-width="1"/>
+
+            <!-- Legend -->
+            <rect x="0"  y="0" width="8" height="8" rx="2" fill="#1B3461"/>
+            <text x="12" y="8" font-size="8.5" fill="#6B82A3" font-family="Inter,sans-serif">iCognative Tests</text>
+            <rect x="110" y="0" width="8" height="8" rx="2" fill="#F5A623"/>
+            <text x="122" y="8" font-size="8.5" fill="#6B82A3" font-family="Inter,sans-serif">Calm Sync Sessions</text>
+
+          </svg>
+
+          <!-- MINI STATS PANEL (right of area chart) -->
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:10px">Key Stats</div>
+            <div class="mini-stats">
+              <div class="ms-item">
+                <div class="ms-label">Peak Month</div>
+                <div class="ms-val" style="color:var(--navy)">Jan 2026</div>
+              </div>
+              <div class="ms-item">
+                <div class="ms-label">CID Peak</div>
+                <div class="ms-val" style="color:var(--orange)">Sep 2025</div>
+              </div>
+              <div class="ms-item">
+                <div class="ms-label">Annotations</div>
+                <div class="ms-val" style="color:var(--navy)">341</div>
+              </div>
+              <div class="ms-item">
+                <div class="ms-label">Grand Total</div>
+                <div class="ms-val" style="color:var(--navy)">2,302</div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /area-wrap -->
+
+      </div><!-- /area card -->
+
+      <!-- CID HIGHLIGHTS CARD -->
+      <div class="card">
+        <div class="card-hdr">
+          <div>
+            <div class="card-title" style="color:var(--navy)">Kolkata CID Operations</div>
+            <div class="card-sub">Bhawani Bhawan · Sep 2025 (repeat visit)</div>
+          </div>
+        </div>
+
+        <div class="cid-list">
+          <div class="cid-item">
+            <div class="cid-dot" style="background:var(--navy)"></div>
+            <div>
+              <div class="cid-title">Investigative Case Execution</div>
+              <div class="cid-desc">20+ iCognative cases across 10 suspects. Protocol compliance, ERP monitoring &amp; annotation review — independently managed.</div>
+            </div>
+          </div>
+          <div class="cid-item">
+            <div class="cid-dot" style="background:var(--orange)"></div>
+            <div>
+              <div class="cid-title">Documentation &amp; Reporting</div>
+              <div class="cid-desc">Case reports, POC sheets, case-wise summaries &amp; operational observations prepared for all conducted cases.</div>
+            </div>
+          </div>
+          <div class="cid-item">
+            <div class="cid-dot" style="background:#4A7EBB"></div>
+            <div>
+              <div class="cid-title">CID Officer Demonstrations</div>
+              <div class="cid-desc">Live iCognative workflow demonstrations to CID officers — operational readiness fully validated prior to each session.</div>
+            </div>
+          </div>
+          <div class="cid-item">
+            <div class="cid-dot" style="background:#A8BDCF"></div>
+            <div>
+              <div class="cid-title">ERP Feedback → Product Impact</div>
+              <div class="cid-desc">Field observations from CID sessions influenced ERP logic changes (4th, 6th, 8th targets) in iCognative Stage.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cid-badge">
+          🧠 &nbsp; iCognative Priority · 1,300+ Tests
+        </div>
+
+      </div><!-- /cid card -->
+
+    </div><!-- /row2 -->
+
+    <!-- ── FULL ACTIVITY SUMMARY STRIP ───────────────── -->
+    <div class="card" style="margin-top:18px">
+      <div class="card-hdr" style="margin-bottom:16px">
+        <div>
+          <div class="card-title">Full Activity Summary</div>
+          <div class="card-sub">All tracked activities · June 2025 – May 2026 · Every number visible on dashboard included</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr) 1.4fr;border:1px solid var(--border);border-radius:10px;overflow:hidden">
+
+        <div style="padding:14px 16px;border-right:1px solid var(--border)">
+          <div style="font-size:8.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px">iCognative</div>
+          <div style="font-size:22px;font-weight:900;color:var(--navy);line-height:1">1,300</div>
+          <div style="font-size:9px;color:var(--muted);margin-top:4px">Stage · QA · Prod · CID</div>
+        </div>
+
+        <div style="padding:14px 16px;border-right:1px solid var(--border)">
+          <div style="font-size:8.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px">Calm Sync</div>
+          <div style="font-size:22px;font-weight:900;color:var(--orange);line-height:1">500</div>
+          <div style="font-size:9px;color:var(--muted);margin-top:4px">Web · Android · iOS</div>
+        </div>
+
+        <div style="padding:14px 16px;border-right:1px solid var(--border)">
+          <div style="font-size:8.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px">iC Mini</div>
+          <div style="font-size:22px;font-weight:900;color:#4A7EBB;line-height:1">50</div>
+          <div style="font-size:9px;color:var(--muted);margin-top:4px">Web &amp; Android</div>
+        </div>
+
+        <div style="padding:14px 16px;border-right:1px solid var(--border)">
+          <div style="font-size:8.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px">My I'd</div>
+          <div style="font-size:22px;font-weight:900;color:#A8BDCF;line-height:1">50</div>
+          <div style="font-size:9px;color:var(--muted);margin-top:4px">Protocol sessions</div>
+        </div>
+
+        <div style="padding:14px 16px;border-right:1px solid var(--border);background:rgba(27,52,97,.03)">
+          <div style="font-size:8.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px">Annotations</div>
+          <div style="font-size:22px;font-weight:900;color:var(--navy);line-height:1">341</div>
+          <div style="font-size:9px;color:var(--muted);margin-top:4px">Manual ERP labels</div>
+        </div>
+
+        <div style="padding:14px 16px;border-right:1px solid var(--border);background:rgba(27,52,97,.03)">
+          <div style="font-size:8.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px">Brain ID</div>
+          <div style="font-size:22px;font-weight:900;color:var(--navy);line-height:1">29</div>
+          <div style="font-size:9px;color:var(--muted);margin-top:4px">Biometric sessions</div>
+        </div>
+
+        <div style="padding:14px 16px;border-right:1px solid var(--border);background:rgba(27,52,97,.03)">
+          <div style="font-size:8.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px">Depression Tests</div>
+          <div style="font-size:22px;font-weight:900;color:var(--navy);line-height:1">32</div>
+          <div style="font-size:9px;color:var(--muted);margin-top:4px">Clinical protocol</div>
+        </div>
+
+        <div style="padding:16px 20px;background:var(--navy)">
+          <div style="font-size:8.5px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px">Grand Total</div>
+          <div style="font-size:26px;font-weight:900;color:var(--orange);line-height:1;letter-spacing:-1px">2,302</div>
+          <div style="font-size:9px;color:rgba(255,255,255,.4);margin-top:5px">All Activities · FY 2025–26</div>
+          <div style="margin-top:9px;font-size:8px;color:rgba(255,255,255,.35);line-height:1.6">
+            1,300 + 500 + 50 + 50<br>+ 341 + 29 + 32
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /summary strip -->
+
+  </main><!-- /main -->
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!--   LOGISTICS VIEW                               -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div id="logistics-view" style="display:none">
+
+    <!-- HEADER -->
+    <div class="mhdr">
+      <div>
+        <div class="mhdr-title">Calm Sync — Delivery Map</div>
+        <div class="mhdr-sub">Headset Shipment Tracker &nbsp;·&nbsp; Feb 2026 – Sep 2026 &nbsp;·&nbsp; 17 Devices Pan-India</div>
+      </div>
+      <div class="mhdr-menu"><span></span><span></span><span></span></div>
+    </div>
+
+    <!-- KPI STRIP -->
+    <div class="kpi-strip" style="margin-bottom:20px">
+
+      <!-- Headsets Shipped (featured) -->
+      <div class="kpi-card featured">
+        <div class="kpi-body">
+          <div class="kpi-lbl">Headsets Shipped</div>
+          <div class="kpi-val">17</div>
+          <div class="kpi-sub">Calm Sync devices delivered across India</div>
+        </div>
+        <div class="kpi-icon-circle">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <rect x="2" y="6" width="18" height="13" rx="2" stroke="rgba(255,255,255,.85)" stroke-width="2"/>
+            <path d="M6 6V5a5 5 0 0110 0v1" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"/>
+            <path d="M9 11h4" stroke="rgba(255,255,255,.85)" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Delivery Cities -->
+      <div class="kpi-card">
+        <div class="kpi-body">
+          <div class="kpi-lbl">Delivery Cities</div>
+          <div class="kpi-val" style="color:var(--orange)">8</div>
+          <div class="kpi-sub">Anantnag · Jaipur · Delhi · Rishikesh…</div>
+        </div>
+        <div class="kpi-icon-circle" style="background:var(--orange-pale)">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M11 2C8.24 2 6 4.24 6 7c0 3.75 5 11 5 11s5-7.25 5-11c0-2.76-2.24-5-5-5z" stroke="#F5A623" stroke-width="2"/>
+            <circle cx="11" cy="7" r="2" stroke="#F5A623" stroke-width="1.5"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- States Covered -->
+      <div class="kpi-card">
+        <div class="kpi-body">
+          <div class="kpi-lbl">States / UTs</div>
+          <div class="kpi-val" style="color:var(--navy)">7</div>
+          <div class="kpi-sub">J&amp;K · Rajasthan · Delhi · Haryana…</div>
+        </div>
+        <div class="kpi-icon-circle ic">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M3 19L5 12l5 5 4-8 5 10" stroke="#1B3461" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Couriers -->
+      <div class="kpi-card">
+        <div class="kpi-body">
+          <div class="kpi-lbl">Courier Partners</div>
+          <div class="kpi-val" style="color:#4A7EBB">4</div>
+          <div class="kpi-sub">DTDC · Porter · Delhivery · Hand Delivery</div>
+        </div>
+        <div class="kpi-icon-circle" style="background:#EEF4FF">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <rect x="1" y="9" width="20" height="11" rx="2" stroke="#4A7EBB" stroke-width="2"/>
+            <path d="M5 9V7a6 6 0 0112 0v2" stroke="#4A7EBB" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+    </div><!-- /kpi-strip -->
+
+    <!-- MAP + TABLE -->
+    <div style="display:grid;grid-template-columns:1fr 400px;gap:16px;align-items:start">
+
+      <!-- INDIA MAP CARD -->
+      <div class="card">
+        <div class="card-hdr" style="margin-bottom:12px">
+          <div>
+            <div class="card-title">Delivery Coverage Map — India</div>
+            <div class="card-sub">Calm Sync headset deployment · Hover a pin for details</div>
+          </div>
+          <div style="display:flex;gap:14px">
+            <div class="leg"><div style="width:10px;height:10px;border-radius:50%;background:var(--navy)"></div><div class="leg-txt">2+ headsets</div></div>
+            <div class="leg"><div style="width:10px;height:10px;border-radius:50%;background:var(--orange)"></div><div class="leg-txt">1 headset</div></div>
+          </div>
+        </div>
+
+        <svg id="india-map" width="100%" viewBox="0 0 560 670" xmlns="http://www.w3.org/2000/svg" style="display:block">
+
+          <!-- ── INDIA OUTLINE ───────────────────────── -->
+          <!-- Coordinates: x=(lng-68)/29*560, y=(37-lat)/29*650 -->
+          <!-- Western border: NW J&K → Pakistan → Gujarat → coast -->
+          <!-- Eastern border: Kanyakumari → AP → Odisha → Bengal → Northeast -->
+          <!-- Northern border: Arunachal → Nepal → Himachal → J&K -->
+          <path d="
+            M 125,13
+            L 95,70 L 80,95 L 63,130 L 48,195 L 25,245
+            L 10,302 L 15,330 L 22,358
+            L 58,390 L 93,415 L 95,445 L 102,475 L 102,505
+            L 95,535 L 108,565 L 118,590 L 132,622 L 158,648
+            L 192,632 L 222,602 L 238,568
+            L 250,535 L 260,498 L 270,460 L 290,435
+            L 325,405 L 360,380 L 390,355 L 405,342
+            L 422,330 L 452,320 L 480,312 L 507,298 L 528,275 L 550,260
+            L 545,225 L 490,205 L 455,208 L 420,208
+            L 385,200 L 358,193 L 328,188 L 298,185 L 265,185 L 245,182
+            L 218,170 L 198,148 L 192,132 L 182,115
+            L 168,95 L 172,65 L 175,52 L 190,48 L 210,42
+            L 230,48 L 235,30 L 210,18 L 165,12
+            Z"
+            fill="#EEF1F7" stroke="#DDE5F0" stroke-width="1.5" stroke-linejoin="round"/>
+
+          <!-- Subtle internal geography hints -->
+          <!-- Ganges plain rough line -->
+          <path d="M 198,158 Q 240,168 290,170 Q 340,172 390,165"
+            fill="none" stroke="rgba(74,126,187,0.2)" stroke-width="1.5"/>
+          <!-- Deccan divide hint -->
+          <path d="M 108,465 Q 160,430 210,440 Q 250,445 280,430"
+            fill="none" stroke="rgba(168,189,207,0.3)" stroke-width="1"/>
+          <!-- Western Ghats hint -->
+          <path d="M 102,415 L 100,475 L 98,530 L 108,565"
+            fill="none" stroke="rgba(168,189,207,0.3)" stroke-width="1.2"/>
+
+          <!-- ── DELIVERY PINS ────────────────────────── -->
+
+          <!-- 1. Anantnag, J&K (138,73) — 2 headsets — navy (multiple) -->
+          <g class="map-pin" data-city="Anantnag, J&amp;K" data-h="2 Headsets (#37, #153)" data-r="Nasir Amin Patigaru" data-d="Feb 24, 2026 · DTDC">
+            <circle class="pin-outer" cx="138" cy="73" r="13" fill="#1B3461" opacity="0.12"/>
+            <circle cx="138" cy="73" r="7" fill="#1B3461" stroke="white" stroke-width="2"/>
+            <text x="138" y="76.5" text-anchor="middle" font-size="7.5" fill="white" font-weight="800" font-family="Inter,sans-serif">2</text>
+            <text x="150" y="70" font-size="8" fill="#1B3461" font-weight="700" font-family="Inter,sans-serif">Anantnag</text>
+            <text x="150" y="80" font-size="7" fill="#6B82A3" font-family="Inter,sans-serif">J&amp;K</text>
+          </g>
+
+          <!-- 2. Jaipur, Rajasthan (151,226) — 2 headsets — navy -->
+          <g class="map-pin" data-city="Jaipur, Rajasthan" data-h="2 Headsets (#78, #79)" data-r="Akshay Gupta" data-d="Mar 30, 2026 · DTDC">
+            <circle class="pin-outer" cx="151" cy="226" r="13" fill="#1B3461" opacity="0.12"/>
+            <circle cx="151" cy="226" r="7" fill="#1B3461" stroke="white" stroke-width="2"/>
+            <text x="151" y="229.5" text-anchor="middle" font-size="7.5" fill="white" font-weight="800" font-family="Inter,sans-serif">2</text>
+            <text x="163" y="222" font-size="8" fill="#1B3461" font-weight="700" font-family="Inter,sans-serif">Jaipur</text>
+            <text x="163" y="232" font-size="7" fill="#6B82A3" font-family="Inter,sans-serif">Rajasthan</text>
+          </g>
+
+          <!-- 3. Delhi NCT (178,186) — 3 headsets — navy -->
+          <g class="map-pin" data-city="Delhi (NCT)" data-h="3 Headsets (#32, #43, #48)" data-r="Suvira Sharma · Dr. Sumathy Bachchan" data-d="Apr–May 2026 · Porter">
+            <circle class="pin-outer" cx="178" cy="186" r="15" fill="#1B3461" opacity="0.12"/>
+            <circle cx="178" cy="186" r="8" fill="#1B3461" stroke="white" stroke-width="2"/>
+            <text x="178" y="189.5" text-anchor="middle" font-size="8" fill="white" font-weight="800" font-family="Inter,sans-serif">3</text>
+            <text x="190" y="182" font-size="8" fill="#1B3461" font-weight="700" font-family="Inter,sans-serif">Delhi</text>
+            <text x="190" y="192" font-size="7" fill="#6B82A3" font-family="Inter,sans-serif">NCT</text>
+          </g>
+
+          <!-- 4. Gurugram, Haryana (165,200) — 1 headset — orange (single) -->
+          <g class="map-pin" data-city="Gurugram, Haryana" data-h="1 Headset (#61)" data-r="Yash Mukand" data-d="May 18, 2026 · Porter">
+            <circle class="pin-outer" cx="162" cy="201" r="10" fill="#F5A623" opacity="0.18"/>
+            <circle cx="162" cy="201" r="5.5" fill="#F5A623" stroke="white" stroke-width="1.5"/>
+            <text x="162" y="204" text-anchor="middle" font-size="6.5" fill="white" font-weight="800" font-family="Inter,sans-serif">1</text>
+            <text x="148" y="215" font-size="7" fill="#1B3461" font-weight="600" font-family="Inter,sans-serif" text-anchor="middle">Gurugram</text>
+          </g>
+
+          <!-- 5. Rishikesh, Uttarakhand (198,158) — 5 headsets — navy -->
+          <g class="map-pin" data-city="Rishikesh, Uttarakhand" data-h="5 Headsets (#89, #101, #118, #136, #142)" data-r="4 Recipients incl. Yogi Dr Amrit Raj" data-d="Apr 2026 · DTDC + Delhivery">
+            <circle class="pin-outer" cx="208" cy="160" r="16" fill="#1B3461" opacity="0.12"/>
+            <circle cx="208" cy="160" r="9" fill="#1B3461" stroke="white" stroke-width="2"/>
+            <text x="208" y="163.5" text-anchor="middle" font-size="9" fill="white" font-weight="800" font-family="Inter,sans-serif">5</text>
+            <text x="221" y="155" font-size="8" fill="#1B3461" font-weight="700" font-family="Inter,sans-serif">Rishikesh</text>
+            <text x="221" y="165" font-size="7" fill="#6B82A3" font-family="Inter,sans-serif">Uttarakhand</text>
+          </g>
+
+          <!-- 6. Hyderabad, Telangana (203,440) — 2 headsets — navy -->
+          <g class="map-pin" data-city="Hyderabad, Telangana" data-h="2 Headsets (#31, #180)" data-r="Dr. Keshav Rao" data-d="Sep 3, 2026 · Hand Delivery">
+            <circle class="pin-outer" cx="203" cy="440" r="13" fill="#1B3461" opacity="0.12"/>
+            <circle cx="203" cy="440" r="7" fill="#1B3461" stroke="white" stroke-width="2"/>
+            <text x="203" y="443.5" text-anchor="middle" font-size="7.5" fill="white" font-weight="800" font-family="Inter,sans-serif">2</text>
+            <text x="215" y="436" font-size="8" fill="#1B3461" font-weight="700" font-family="Inter,sans-serif">Hyderabad</text>
+            <text x="215" y="446" font-size="7" fill="#6B82A3" font-family="Inter,sans-serif">Telangana</text>
+          </g>
+
+          <!-- 7. Mumbai, Maharashtra (93,402) — 1 headset — orange -->
+          <g class="map-pin" data-city="Mumbai, Maharashtra" data-h="1 Headset (#157)" data-r="Anubhuti Goswami" data-d="Apr 13, 2026 · DTDC">
+            <circle class="pin-outer" cx="93" cy="402" r="10" fill="#F5A623" opacity="0.18"/>
+            <circle cx="93" cy="402" r="5.5" fill="#F5A623" stroke="white" stroke-width="1.5"/>
+            <text x="93" y="405" text-anchor="middle" font-size="6.5" fill="white" font-weight="800" font-family="Inter,sans-serif">1</text>
+            <text x="50" y="398" font-size="8" fill="#1B3461" font-weight="700" font-family="Inter,sans-serif" text-anchor="middle">Mumbai</text>
+            <text x="50" y="408" font-size="7" fill="#6B82A3" font-family="Inter,sans-serif" text-anchor="middle">Maharashtra</text>
+          </g>
+
+          <!-- 8. Pune, Maharashtra (113,416) — 1 headset — orange -->
+          <g class="map-pin" data-city="Pune, Maharashtra" data-h="1 Headset (#194)" data-r="Krushna Katre" data-d="Apr 17, 2026 · DTDC">
+            <circle class="pin-outer" cx="113" cy="416" r="10" fill="#F5A623" opacity="0.18"/>
+            <circle cx="113" cy="416" r="5.5" fill="#F5A623" stroke="white" stroke-width="1.5"/>
+            <text x="113" y="419" text-anchor="middle" font-size="6.5" fill="white" font-weight="800" font-family="Inter,sans-serif">1</text>
+            <text x="126" y="428" font-size="8" fill="#1B3461" font-weight="700" font-family="Inter,sans-serif">Pune</text>
+          </g>
+
+          <!-- ── PIN TOOLTIP ─────────────────────────── -->
+          <g id="map-tooltip" style="display:none" pointer-events="none">
+            <rect id="tt-bg" rx="8" fill="#1B3461" filter="url(#ttshadow)"/>
+            <text id="tt-city" font-size="10.5" font-weight="700" fill="white" font-family="Inter,sans-serif"/>
+            <text id="tt-headsets" font-size="9" fill="#F5A623" font-family="Inter,sans-serif" font-weight="600"/>
+            <text id="tt-recip"  font-size="8.5" fill="rgba(255,255,255,0.75)" font-family="Inter,sans-serif"/>
+            <text id="tt-date"   font-size="8.5" fill="rgba(255,255,255,0.55)" font-family="Inter,sans-serif"/>
+          </g>
+
+          <!-- Drop-shadow filter for tooltip -->
+          <defs>
+            <filter id="ttshadow" x="-10%" y="-10%" width="120%" height="130%">
+              <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="rgba(0,0,0,0.35)"/>
+            </filter>
+          </defs>
+
+        </svg>
+      </div><!-- /map card -->
+
+      <!-- SHIPMENT TABLE CARD -->
+      <div class="card" style="overflow:hidden">
+        <div class="card-hdr" style="margin-bottom:12px">
+          <div>
+            <div class="card-title">Shipment Log</div>
+            <div class="card-sub">All 17 Calm Sync headsets dispatched</div>
+          </div>
+          <span style="background:var(--navy);color:white;padding:3px 11px;border-radius:12px;font-size:10px;font-weight:700;white-space:nowrap">17 Devices</span>
+        </div>
+
+        <div style="overflow-y:auto;max-height:620px">
+          <table class="logi-table" style="width:100%;border-collapse:collapse">
+            <thead style="position:sticky;top:0;background:white;z-index:1">
+              <tr>
+                <th>Headset #</th>
+                <th>Recipient</th>
+                <th>Location</th>
+                <th>Date</th>
+                <th>Via</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="hset-badge">37, 153</span></td>
+                <td>Nasir Amin Patigaru</td>
+                <td>Anantnag, J&amp;K</td>
+                <td style="white-space:nowrap">Feb 24, 2026</td>
+                <td><span class="courier-badge dtdc">DTDC</span></td>
+              </tr>
+              <tr>
+                <td><span class="hset-badge">78, 79</span></td>
+                <td>Akshay Gupta</td>
+                <td>Jaipur, Rajasthan</td>
+                <td style="white-space:nowrap">Mar 30, 2026</td>
+                <td><span class="courier-badge dtdc">DTDC</span></td>
+              </tr>
+              <tr>
+                <td><span class="hset-badge">32, 43</span></td>
+                <td>Suvira Sharma</td>
+                <td>Shalimar Bagh, Delhi</td>
+                <td style="white-space:nowrap">Apr 1, 2026</td>
+                <td><span class="courier-badge porter">Porter</span></td>
+              </tr>
+              <tr>
+                <td><span class="hset-badge">118</span></td>
+                <td>Jetan Arora</td>
+                <td>Rishikesh, Uttarakhand</td>
+                <td style="white-space:nowrap">Apr 6, 2026</td>
+                <td><span class="courier-badge dtdc">DTDC</span></td>
+              </tr>
+              <tr>
+                <td><span class="hset-badge">136</span></td>
+                <td>Vivek B. Gaur</td>
+                <td>Rishikesh, Uttarakhand</td>
+                <td style="white-space:nowrap">Apr 6, 2026</td>
+                <td><span class="courier-badge dtdc">DTDC</span></td>
+              </tr>
+              <tr>
+                <td><span class="hset-badge">89</span></td>
+                <td>Arathi Joshi</td>
+                <td>Rishikesh, Uttarakhand</td>
+                <td style="white-space:nowrap">Apr 8, 2026</td>
+                <td><span class="courier-badge dtdc">DTDC</span></td>
+              </tr>
+              <tr>
+                <td><span class="hset-badge">101</span></td>
+                <td>Arvind Kumar</td>
+                <td>Rishikesh, Uttarakhand</td>
+                <td style="white-space:nowrap">Apr 8, 2026</td>
+                <td><span class="courier-badge dtdc">DTDC</span></td>
+              </tr>
+              <tr>
+                <td><span class="hset-badge">157</span></td>
+                <td>Anubhuti Goswami</td>
+                <td>Andheri W, Mumbai</td>
+                <td style="white-space:nowrap">Apr 13, 2026</td>
+                <td><span class="courier-badge dtdc">DTDC</span></td>
+              </tr>
+              <tr>
+                <td><span class="hset-badge">142</span></td>
+                <td>Yogi Dr Amrit Raj</td>
+                <td>Tapovan, Rishikesh</td>
+                <td style="white-space:nowrap">Apr 17, 2026</td>
+                <td><span class="courier-badge delhivery">Delhivery</span></td>
+              </tr>
+              <tr>
+                <td><span class="hset-badge">194</span></td>
+                <td>Krushna Katre</td>
+                <td>Pune, Maharashtra</td>
+                <td style="white-space:nowrap">Apr 17, 2026</td>
+                <td><span class="courier-badge dtdc">DTDC</span></td>
+              </tr>
+              <tr>
+                <td><span class="hset-badge">48</span></td>
+                <td>Dr. Sumathy Bachchan</td>
+                <td>Malviya Nagar, Delhi</td>
+                <td style="white-space:nowrap">May 18, 2026</td>
+                <td><span class="courier-badge porter">Porter</span></td>
+              </tr>
+              <tr>
+                <td><span class="hset-badge">61</span></td>
+                <td>Yash Mukand</td>
+                <td>Gurugram, Haryana</td>
+                <td style="white-space:nowrap">May 18, 2026</td>
+                <td><span class="courier-badge porter">Porter</span></td>
+              </tr>
+              <tr style="background:rgba(245,166,35,.05)">
+                <td><span class="hset-badge">31, 180</span></td>
+                <td>Dr. Keshav Rao</td>
+                <td>Hyderabad, Telangana</td>
+                <td style="white-space:nowrap">Sep 3, 2026</td>
+                <td><span class="courier-badge hand">Hand</span></td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr style="background:#F8FAFD">
+                <td colspan="3" style="font-weight:800;color:#1B3461;font-size:11px;padding:10px">Total Devices Shipped</td>
+                <td colspan="2" style="font-weight:900;color:var(--orange);font-size:15px;text-align:right;padding:10px">17</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <!-- Courier key -->
+        <div style="margin-top:14px;padding:12px 14px;background:var(--bg);border-radius:8px;display:flex;flex-wrap:wrap;gap:10px">
+          <span class="courier-badge dtdc">DTDC</span>
+          <span class="courier-badge porter">Porter</span>
+          <span class="courier-badge delhivery">Delhivery</span>
+          <span class="courier-badge hand">Hand Delivery</span>
+          <span style="font-size:9.5px;color:var(--muted);margin-left:4px;align-self:center">Courier legend</span>
+        </div>
+      </div><!-- /table card -->
+
+    </div><!-- /map+table grid -->
+
+  </div><!-- /logistics-view -->
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!--   KOLKATA CID VIEW                                          -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <div id="cid-view" style="display:none">
+
+    <!-- HEADER -->
+    <div class="mhdr">
+      <div>
+        <div class="mhdr-title">Kolkata CID — Engine Analysis</div>
+        <div class="mhdr-sub">Criminal Investigation Department · Bhawani Bhawan, Kolkata · Sep 17–27, 2025 · iCognative Protocol</div>
+      </div>
+      <div style="background:#FFF6E5;border:1px solid rgba(245,166,35,.3);border-radius:8px;padding:6px 14px;font-size:11px;font-weight:700;color:var(--orange-dark)">
+        🔐 Restricted Access
+      </div>
+    </div>
+
+    <!-- KPI STRIP -->
+    <div class="kpi-strip" style="margin-bottom:18px">
+
+      <div class="kpi-card featured">
+        <div class="kpi-body">
+          <div class="kpi-lbl">Suspects Profiled</div>
+          <div class="kpi-val">10</div>
+          <div class="kpi-sub">Tested · Sep 17–27, 2025</div>
+        </div>
+        <div class="kpi-icon-circle">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <circle cx="8"  cy="9" r="3" stroke="rgba(255,255,255,.85)" stroke-width="2"/>
+            <path   d="M2 19c0-3.314 2.686-6 6-6" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="15" cy="9" r="3" stroke="rgba(255,255,255,.85)" stroke-width="2"/>
+            <path   d="M11 19c0-3.314 2.686-5 5-5" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-body">
+          <div class="kpi-lbl">Test Sessions</div>
+          <div class="kpi-val" style="color:var(--orange)">29</div>
+          <div class="kpi-sub">P1 + P2 protocol · 6 engines</div>
+        </div>
+        <div class="kpi-icon-circle">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M4 6h14M4 11h14M4 16h8" stroke="#F5A623" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-body">
+          <div class="kpi-lbl">Active Days</div>
+          <div class="kpi-val" style="color:var(--navy)">9</div>
+          <div class="kpi-sub">Over 11-day window · Sep 2025</div>
+        </div>
+        <div class="kpi-icon-circle ic">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <rect x="3" y="4" width="16" height="15" rx="2" stroke="#1B3461" stroke-width="2"/>
+            <path d="M7 2v4M15 2v4" stroke="#1B3461" stroke-width="2" stroke-linecap="round"/>
+            <path d="M3 9h16" stroke="#1B3461" stroke-width="1.5"/>
+            <rect x="7" y="12" width="3" height="3" rx="0.5" fill="#1B3461"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="kpi-card" style="background:linear-gradient(135deg,#FFFCF5 0%,#FFF6E5 100%);border:1.5px solid rgba(245,166,35,.25)">
+        <div class="kpi-body">
+          <div class="kpi-lbl" style="color:#C17D0F">Best Engine Accuracy</div>
+          <div class="kpi-val" style="color:var(--orange)">96.8<span class="sup">%</span></div>
+          <div class="kpi-sub">Engine 24 · Highest overall confidence</div>
+        </div>
+        <div class="kpi-icon-circle" style="background:rgba(245,166,35,.15)">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M11 2.5l2.2 4.9 5.3.5-3.9 3.6 1.2 5.2L11 13.9l-4.8 2.8 1.2-5.2L3.5 7.9l5.3-.5z" stroke="#F5A623" stroke-width="1.8" stroke-linejoin="round" fill="rgba(245,166,35,.2)"/>
+          </svg>
+        </div>
+      </div>
+
+    </div><!-- /kpi-strip -->
+
+    <!-- ROW 1: Day chart + Engine comparison -->
+    <div style="display:grid;grid-template-columns:1fr 290px;gap:16px;margin-bottom:16px">
+
+      <!-- Day-by-day bar chart -->
+      <div class="card">
+        <div class="card-hdr">
+          <div>
+            <div class="card-title">Daily Session Activity</div>
+            <div class="card-sub">iCognative test sessions per active day · Sep 17–27, 2025</div>
+          </div>
+          <div style="background:rgba(27,52,97,.07);border-radius:20px;padding:3px 11px;font-size:9.5px;font-weight:700;color:var(--navy)">29 Total</div>
+        </div>
+        <svg width="100%" viewBox="0 0 580 165" xmlns="http://www.w3.org/2000/svg">
+          <line x1="45" y1="16"  x2="565" y2="16"  stroke="#EEF1F7" stroke-width="1"/>
+          <line x1="45" y1="54"  x2="565" y2="54"  stroke="#EEF1F7" stroke-width="1"/>
+          <line x1="45" y1="92"  x2="565" y2="92"  stroke="#EEF1F7" stroke-width="1"/>
+          <line x1="45" y1="130" x2="565" y2="130" stroke="#DDE5F0" stroke-width="1"/>
+          <text x="38" y="20"  text-anchor="end" font-size="9" fill="#A8BDCF" font-family="Inter,sans-serif">6</text>
+          <text x="38" y="58"  text-anchor="end" font-size="9" fill="#A8BDCF" font-family="Inter,sans-serif">4</text>
+          <text x="38" y="96"  text-anchor="end" font-size="9" fill="#A8BDCF" font-family="Inter,sans-serif">2</text>
+          <text x="38" y="133" text-anchor="end" font-size="9" fill="#A8BDCF" font-family="Inter,sans-serif">0</text>
+          <!-- Sep 17: 2 -->
+          <rect x="57"  y="92"  width="34" height="38"  fill="#1B3461" rx="3" opacity=".8"/>
+          <text x="74"  y="88"  text-anchor="middle" font-size="9" fill="#1B3461" font-weight="700" font-family="Inter,sans-serif">2</text>
+          <text x="74"  y="148" text-anchor="middle" font-size="8.5" fill="#A8BDCF" font-family="Inter,sans-serif">Sep 17</text>
+          <!-- Sep 18: 6 — PEAK -->
+          <rect x="102" y="10"  width="46" height="120" fill="rgba(245,166,35,.07)" rx="4"/>
+          <rect x="108" y="16"  width="34" height="114" fill="#1B3461" rx="3"/>
+          <rect x="100" y="3"   width="52" height="15"  rx="6" fill="#F5A623"/>
+          <text x="126" y="13"  text-anchor="middle" font-size="7.5" fill="white" font-weight="800" font-family="Inter,sans-serif">Peak: 6</text>
+          <text x="125" y="30"  text-anchor="middle" font-size="9" fill="white" font-weight="700" font-family="Inter,sans-serif">6</text>
+          <text x="125" y="148" text-anchor="middle" font-size="8.5" fill="#1B3461" font-weight="700" font-family="Inter,sans-serif">Sep 18</text>
+          <!-- Sep 20: 5 -->
+          <rect x="171" y="35"  width="34" height="95"  fill="#1B3461" rx="3" opacity=".85"/>
+          <text x="188" y="31"  text-anchor="middle" font-size="9" fill="#1B3461" font-weight="700" font-family="Inter,sans-serif">5</text>
+          <text x="188" y="148" text-anchor="middle" font-size="8.5" fill="#A8BDCF" font-family="Inter,sans-serif">Sep 20</text>
+          <!-- Sep 22: 2 -->
+          <rect x="228" y="92"  width="34" height="38"  fill="#1B3461" rx="3" opacity=".8"/>
+          <text x="245" y="88"  text-anchor="middle" font-size="9" fill="#1B3461" font-weight="700" font-family="Inter,sans-serif">2</text>
+          <text x="245" y="148" text-anchor="middle" font-size="8.5" fill="#A8BDCF" font-family="Inter,sans-serif">Sep 22</text>
+          <!-- Sep 23: 2 -->
+          <rect x="285" y="92"  width="34" height="38"  fill="#1B3461" rx="3" opacity=".8"/>
+          <text x="302" y="88"  text-anchor="middle" font-size="9" fill="#1B3461" font-weight="700" font-family="Inter,sans-serif">2</text>
+          <text x="302" y="148" text-anchor="middle" font-size="8.5" fill="#A8BDCF" font-family="Inter,sans-serif">Sep 23</text>
+          <!-- Sep 24: 3 -->
+          <rect x="343" y="73"  width="34" height="57"  fill="#1B3461" rx="3" opacity=".85"/>
+          <text x="360" y="69"  text-anchor="middle" font-size="9" fill="#1B3461" font-weight="700" font-family="Inter,sans-serif">3</text>
+          <text x="360" y="148" text-anchor="middle" font-size="8.5" fill="#A8BDCF" font-family="Inter,sans-serif">Sep 24</text>
+          <!-- Sep 25: 5 -->
+          <rect x="400" y="35"  width="34" height="95"  fill="#1B3461" rx="3" opacity=".85"/>
+          <text x="417" y="31"  text-anchor="middle" font-size="9" fill="#1B3461" font-weight="700" font-family="Inter,sans-serif">5</text>
+          <text x="417" y="148" text-anchor="middle" font-size="8.5" fill="#A8BDCF" font-family="Inter,sans-serif">Sep 25</text>
+          <!-- Sep 26: 2 -->
+          <rect x="457" y="92"  width="34" height="38"  fill="#1B3461" rx="3" opacity=".8"/>
+          <text x="474" y="88"  text-anchor="middle" font-size="9" fill="#1B3461" font-weight="700" font-family="Inter,sans-serif">2</text>
+          <text x="474" y="148" text-anchor="middle" font-size="8.5" fill="#A8BDCF" font-family="Inter,sans-serif">Sep 26</text>
+          <!-- Sep 27: 2 -->
+          <rect x="514" y="92"  width="34" height="38"  fill="#1B3461" rx="3" opacity=".8"/>
+          <text x="531" y="88"  text-anchor="middle" font-size="9" fill="#1B3461" font-weight="700" font-family="Inter,sans-serif">2</text>
+          <text x="531" y="148" text-anchor="middle" font-size="8.5" fill="#A8BDCF" font-family="Inter,sans-serif">Sep 27</text>
+        </svg>
+      </div>
+
+      <!-- Engine Performance -->
+      <div class="card">
+        <div class="card-hdr">
+          <div>
+            <div class="card-title">Engine Confidence</div>
+            <div class="card-sub">Avg confidence · P1 + P2 phases combined</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:13px;margin-top:4px">
+          <!-- E24 BEST -->
+          <div style="background:linear-gradient(135deg,#FFFCF5,#FFF6E5);border:1px solid rgba(245,166,35,.3);border-radius:8px;padding:10px 12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <div style="font-size:11.5px;font-weight:700;color:var(--navy)">Engine 24 <span style="background:#F5A623;color:white;font-size:7.5px;padding:1.5px 5px;border-radius:3px;margin-left:4px;font-weight:800">BEST</span></div>
+              <div style="font-size:14px;font-weight:900;color:var(--orange)">96.8%</div>
+            </div>
+            <div style="height:6px;background:#EEE;border-radius:3px;overflow:hidden">
+              <div style="width:73.3%;height:100%;background:var(--orange);border-radius:3px"></div>
+            </div>
+            <div style="font-size:8.5px;color:var(--muted);margin-top:4px">P1: 97.2% · P2: 96.5%</div>
+          </div>
+          <!-- E20 -->
+          <div style="padding:0 2px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+              <span style="font-size:11px;font-weight:600;color:var(--text)">Engine 20</span>
+              <span style="font-size:12px;font-weight:800;color:var(--navy)">95.0%</span>
+            </div>
+            <div style="height:5px;background:#EEF1F7;border-radius:2.5px;overflow:hidden">
+              <div style="width:58.3%;height:100%;background:#1B3461;border-radius:2.5px"></div>
+            </div>
+          </div>
+          <!-- E21 -->
+          <div style="padding:0 2px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+              <span style="font-size:11px;font-weight:600;color:var(--text)">Engine 21</span>
+              <span style="font-size:12px;font-weight:800;color:var(--navy)">94.7%</span>
+            </div>
+            <div style="height:5px;background:#EEF1F7;border-radius:2.5px;overflow:hidden">
+              <div style="width:55.8%;height:100%;background:#1B3461;border-radius:2.5px"></div>
+            </div>
+          </div>
+          <!-- E19 -->
+          <div style="padding:0 2px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+              <span style="font-size:11px;font-weight:600;color:var(--text)">Engine 19</span>
+              <span style="font-size:12px;font-weight:800;color:var(--navy)">94.4%</span>
+            </div>
+            <div style="height:5px;background:#EEF1F7;border-radius:2.5px;overflow:hidden">
+              <div style="width:53.3%;height:100%;background:#1B3461;border-radius:2.5px"></div>
+            </div>
+          </div>
+          <!-- Default -->
+          <div style="padding:0 2px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+              <span style="font-size:11px;font-weight:600;color:var(--text)">Default</span>
+              <span style="font-size:12px;font-weight:800;color:var(--navy)">94.2%</span>
+            </div>
+            <div style="height:5px;background:#EEF1F7;border-radius:2.5px;overflow:hidden">
+              <div style="width:51.7%;height:100%;background:#2E4E88;border-radius:2.5px"></div>
+            </div>
+          </div>
+          <!-- E23 -->
+          <div style="padding:0 2px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+              <span style="font-size:11px;font-weight:600;color:var(--text)">Engine 23</span>
+              <span style="font-size:12px;font-weight:800;color:#4A7EBB">93.4%</span>
+            </div>
+            <div style="height:5px;background:#EEF1F7;border-radius:2.5px;overflow:hidden">
+              <div style="width:45.0%;height:100%;background:#4A7EBB;border-radius:2.5px"></div>
+            </div>
+          </div>
+          <div style="padding:7px 10px;background:#F0F3F7;border-radius:6px;font-size:9px;color:var(--muted);text-align:center;margin-top:2px">
+            Scale: 88%→100% · Overall avg: <b style="color:var(--navy)">94.8%</b>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /row1 -->
+
+    <!-- ROW 2: Verdict donut + Suspect table -->
+    <div style="display:grid;grid-template-columns:272px 1fr;gap:16px">
+
+      <!-- Verdict Distribution -->
+      <div class="card">
+        <div class="card-hdr">
+          <div>
+            <div class="card-title">Verdict Distribution</div>
+            <div class="card-sub">All 6 engines · P1 + P2 combined</div>
+          </div>
+        </div>
+        <!-- Donut: r=50, circ=314.159 -->
+        <!-- A=167(54.2%,170.4), P=127(41.2%,129.5), IP=13(4.2%,13.3), IA=1(0.3%,1.0) -->
+        <div style="position:relative;width:140px;height:140px;margin:6px auto 18px">
+          <svg width="140" height="140" viewBox="0 0 140 140">
+            <circle cx="70" cy="70" r="50" fill="none" stroke="#EEF1F7" stroke-width="22"/>
+            <circle cx="70" cy="70" r="50" fill="none" stroke="#1B3461" stroke-width="22"
+              stroke-dasharray="170.4 143.8" stroke-dashoffset="0" transform="rotate(-90 70 70)"/>
+            <circle cx="70" cy="70" r="50" fill="none" stroke="#27AE60" stroke-width="22"
+              stroke-dasharray="129.5 184.7" stroke-dashoffset="-170.4" transform="rotate(-90 70 70)"/>
+            <circle cx="70" cy="70" r="50" fill="none" stroke="#F5A623" stroke-width="22"
+              stroke-dasharray="13.3 300.9" stroke-dashoffset="-299.9" transform="rotate(-90 70 70)"/>
+            <circle cx="70" cy="70" r="50" fill="none" stroke="#E74C3C" stroke-width="22"
+              stroke-dasharray="1.0 313.2" stroke-dashoffset="-313.2" transform="rotate(-90 70 70)"/>
+          </svg>
+          <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center">
+            <div style="font-size:20px;font-weight:900;color:var(--navy);line-height:1">308</div>
+            <div style="font-size:8px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:2px">Verdicts</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:7px">
+              <div style="width:10px;height:10px;border-radius:2px;background:#1B3461;flex-shrink:0"></div>
+              <span style="font-size:11px;color:var(--text);font-weight:600">Aware (A)</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px">
+              <span style="font-size:12px;font-weight:900;color:#1B3461">167</span>
+              <span style="font-size:9px;color:var(--muted)">54.2%</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:7px">
+              <div style="width:10px;height:10px;border-radius:2px;background:#27AE60;flex-shrink:0"></div>
+              <span style="font-size:11px;color:var(--text);font-weight:600">Pass (P)</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px">
+              <span style="font-size:12px;font-weight:900;color:#27AE60">127</span>
+              <span style="font-size:9px;color:var(--muted)">41.2%</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:7px">
+              <div style="width:10px;height:10px;border-radius:2px;background:#F5A623;flex-shrink:0"></div>
+              <span style="font-size:11px;color:var(--text);font-weight:600">Inc. Pass (IP)</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px">
+              <span style="font-size:12px;font-weight:900;color:#F5A623">13</span>
+              <span style="font-size:9px;color:var(--muted)">4.2%</span>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;align-items:center;gap:7px">
+              <div style="width:10px;height:10px;border-radius:2px;background:#E74C3C;flex-shrink:0"></div>
+              <span style="font-size:11px;color:var(--text);font-weight:600">Inc. Aware (IA)</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:5px">
+              <span style="font-size:12px;font-weight:900;color:#E74C3C">1</span>
+              <span style="font-size:9px;color:var(--muted)">0.3%</span>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:14px;padding:7px 10px;background:#F8FAFD;border-radius:6px;font-size:9px;color:var(--muted);text-align:center">
+          Across all 6 engines × 29 sessions × P1+P2 phases
+        </div>
+      </div>
+
+      <!-- Suspect Case Table -->
+      <div class="card">
+        <div class="card-hdr">
+          <div>
+            <div class="card-title">Suspect Case Log</div>
+            <div class="card-sub">10 subjects · iCognative P1+P2 protocol · Bhawani Bhawan, Sep 2025</div>
+          </div>
+          <div style="background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.18);border-radius:6px;padding:3px 10px;font-size:9.5px;font-weight:700;color:#C0392B">Confidential</div>
+        </div>
+        <table class="cid-suspect-table">
+          <thead>
+            <tr>
+              <th style="width:28px">#</th>
+              <th>Subject</th>
+              <th>Test Date(s)</th>
+              <th style="text-align:center">Sessions</th>
+              <th>Protocol Type</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="cst-no">01</td><td><b>Nasir</b></td><td>Sep 17 – Sep 18</td>
+              <td style="text-align:center"><span class="sess-badge" style="background:rgba(245,166,35,.18);color:var(--orange-dark)">8</span></td>
+              <td><span class="proto-ext">Extended · 2-day</span></td>
+              <td class="cst-note">Most-tested subject</td>
+            </tr>
+            <tr>
+              <td class="cst-no">02</td><td><b>Mayur</b></td><td>Sep 20</td>
+              <td style="text-align:center"><span class="sess-badge">3</span></td>
+              <td><span class="proto-std">Standard</span></td>
+              <td class="cst-note">—</td>
+            </tr>
+            <tr>
+              <td class="cst-no">03</td><td><b>Navneet</b></td><td>Sep 20</td>
+              <td style="text-align:center"><span class="sess-badge">2</span></td>
+              <td><span class="proto-std">Standard</span></td>
+              <td class="cst-note">—</td>
+            </tr>
+            <tr>
+              <td class="cst-no">04</td><td><b>Bikash</b></td><td>Sep 22</td>
+              <td style="text-align:center"><span class="sess-badge">2</span></td>
+              <td><span class="proto-std">Standard</span></td>
+              <td class="cst-note">—</td>
+            </tr>
+            <tr>
+              <td class="cst-no">05</td><td><b>Sahbaj</b></td><td>Sep 23</td>
+              <td style="text-align:center"><span class="sess-badge">2</span></td>
+              <td><span class="proto-std">Standard</span></td>
+              <td class="cst-note">—</td>
+            </tr>
+            <tr>
+              <td class="cst-no">06</td><td><b>Laltu</b></td><td>Sep 24</td>
+              <td style="text-align:center"><span class="sess-badge">3</span></td>
+              <td><span class="proto-std">Standard</span></td>
+              <td class="cst-note">—</td>
+            </tr>
+            <tr>
+              <td class="cst-no">07</td><td><b>Yakub</b></td><td>Sep 25</td>
+              <td style="text-align:center"><span class="sess-badge">3</span></td>
+              <td><span class="proto-std">Standard</span></td>
+              <td class="cst-note">—</td>
+            </tr>
+            <tr>
+              <td class="cst-no">08</td><td><b>Arjaul</b></td><td>Sep 25</td>
+              <td style="text-align:center"><span class="sess-badge">2</span></td>
+              <td><span class="proto-std">Standard</span></td>
+              <td class="cst-note">—</td>
+            </tr>
+            <tr>
+              <td class="cst-no">09</td><td><b>Abdul</b></td><td>Sep 26</td>
+              <td style="text-align:center"><span class="sess-badge">2</span></td>
+              <td><span class="proto-std">Standard</span></td>
+              <td class="cst-note">—</td>
+            </tr>
+            <tr>
+              <td class="cst-no">10</td><td><b>Pintu</b></td><td>Sep 27</td>
+              <td style="text-align:center"><span class="sess-badge">2</span></td>
+              <td><span class="proto-std">Standard</span></td>
+              <td class="cst-note">—</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="margin-top:12px;display:flex;gap:12px;padding:9px 14px;background:#F8FAFD;border-radius:8px;align-items:center">
+          <div style="font-size:9.5px;color:var(--muted)">Operators: Sambit Saha &amp; Nitesh &nbsp;·&nbsp; Modality: Text &amp; Image &nbsp;·&nbsp; Source: Engine Analysis — Kolkata.xlsx</div>
+          <div style="margin-left:auto;font-size:12px;font-weight:900;color:var(--navy);white-space:nowrap">Total: 29</div>
+        </div>
+      </div>
+
+    </div><!-- /row2 -->
+
+  </div><!-- /cid-view -->
+
+</div><!-- /app -->
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!--  MODAL OVERLAY                                               -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div id="modal-overlay" style="
+  display:none; position:fixed; inset:0;
+  background:rgba(10,20,45,.55); backdrop-filter:blur(4px);
+  z-index:1000; align-items:center; justify-content:center;">
+  <div id="modal-box" style="
+    background:#fff; border-radius:18px; padding:32px 36px;
+    min-width:520px; max-width:700px; width:90%;
+    box-shadow:0 24px 60px rgba(10,20,45,.25);
+    position:relative; max-height:90vh; overflow-y:auto;">
+    <button onclick="closeModal()" style="
+      position:absolute; top:16px; right:18px;
+      background:none; border:none; font-size:20px; cursor:pointer;
+      color:#6B82A3; line-height:1;">✕</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<style>
+/* ── modal table ───────────────────────────────────────────────── */
+.mtable { width:100%; border-collapse:collapse; margin-top:16px; font-size:12px; }
+.mtable th {
+  text-align:left; padding:8px 12px; font-size:10px; font-weight:700;
+  color:#6B82A3; text-transform:uppercase; letter-spacing:.7px;
+  border-bottom:2px solid #EEF1F7;
+}
+.mtable td { padding:9px 12px; border-bottom:1px solid #EEF1F7; color:#1B3461; font-weight:500; }
+.mtable tr:last-child td { border-bottom:none; }
+.mtable tr:hover td { background:#F8FAFD; }
+.mtable .cid-row td { background:rgba(245,166,35,.07); font-weight:700; }
+.mtable .num { text-align:right; font-weight:700; }
+.modal-title { font-size:17px; font-weight:800; color:#1B3461; margin-bottom:4px; }
+.modal-sub   { font-size:11px; color:#6B82A3; }
+.modal-divider { height:1px; background:#EEF1F7; margin:18px 0; }
+.plat-row { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid #EEF1F7; }
+.plat-row:last-child { border-bottom:none; }
+.plat-bar-wrap { flex:1; height:8px; background:#EEF1F7; border-radius:4px; overflow:hidden; }
+.plat-bar-fill { height:100%; border-radius:4px; }
+.plat-label { font-size:11px; font-weight:600; color:#1B3461; width:200px; }
+.plat-count { font-size:13px; font-weight:800; width:48px; text-align:right; }
+/* sidebar collapse */
+.app.sidebar-collapsed .sidebar { width:0; padding:0; overflow:hidden; }
+.app.sidebar-collapsed .sidebar * { display:none; }
+
+/* ─── LOGISTICS VIEW ────────────────────────────────── */
+#logistics-view { flex:1; padding:28px 28px 32px; overflow-x:hidden; flex-direction:column; }
+
+.hset-badge {
+  display:inline-block;
+  background:#EEF1F7;
+  color:var(--navy);
+  padding:2px 7px;
+  border-radius:4px;
+  font-size:10px;
+  font-weight:700;
+  white-space:nowrap;
+}
+.courier-badge {
+  display:inline-block;
+  padding:2px 8px;
+  border-radius:10px;
+  font-size:9.5px;
+  font-weight:700;
+  white-space:nowrap;
+}
+.courier-badge.dtdc      { background:rgba(27,52,97,.1);   color:var(--navy); }
+.courier-badge.porter    { background:rgba(245,166,35,.18); color:var(--orange-dark); }
+.courier-badge.delhivery { background:rgba(74,126,187,.18); color:#4A7EBB; }
+.courier-badge.hand      { background:rgba(168,189,207,.25); color:#6B82A3; }
+
+.map-pin { cursor:pointer; }
+.map-pin:hover .pin-outer { opacity:.35; }
+.logi-table td { padding:8px 10px; border-bottom:1px solid #EEF1F7; font-size:11px; color:var(--navy); }
+.logi-table th { text-align:left; padding:7px 10px; font-size:9.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; border-bottom:2px solid #EEF1F7; }
+.logi-table tr:last-child td { border-bottom:none; }
+.logi-table tr:hover td { background:#F8FAFD; }
+
+/* ─── KOLKATA CID VIEW ──────────────────────────────── */
+#cid-view { flex:1; padding:28px 28px 32px; overflow-x:hidden; flex-direction:column; }
+
+.cid-suspect-table { width:100%; border-collapse:collapse; font-size:11.5px; }
+.cid-suspect-table th { text-align:left; padding:8px 12px; font-size:9.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.7px; border-bottom:2px solid #EEF1F7; }
+.cid-suspect-table td { padding:9px 12px; border-bottom:1px solid #EEF1F7; color:var(--navy); font-weight:500; vertical-align:middle; }
+.cid-suspect-table tr:last-child td { border-bottom:none; }
+.cid-suspect-table tr:hover td { background:#F8FAFD; }
+
+.cst-no   { color:var(--muted) !important; font-size:10px !important; font-weight:500 !important; }
+.cst-note { font-size:10px !important; color:var(--muted) !important; }
+
+.sess-badge { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:5px; background:rgba(27,52,97,.1); color:var(--navy); font-size:12px; font-weight:800; }
+
+.proto-ext { font-size:10px; color:var(--orange-dark); font-weight:700; }
+.proto-std { font-size:10px; color:var(--navy); font-weight:600; }
+</style>
+
+<script>
+/* ── MODAL HELPERS ───────────────────────────────────────────── */
+function openModal(html) {
+  document.getElementById('modal-content').innerHTML = html;
+  const ov = document.getElementById('modal-overlay');
+  ov.style.display = 'flex';
+}
+function closeModal() {
+  document.getElementById('modal-overlay').style.display = 'none';
+}
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+/* ── NAV ITEMS + VIEW SWITCHING ─────────────────────────────── */
+var mainView  = document.querySelector('.main');
+var logiView  = document.getElementById('logistics-view');
+var cidView   = document.getElementById('cid-view');
+
+document.querySelectorAll('.nav-item').forEach(function(item) {
+  item.addEventListener('click', function() {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    this.classList.add('active');
+
+    var label = this.textContent.trim();
+    if (label.indexOf('Logistics') !== -1) {
+      mainView.style.display = 'none';
+      logiView.style.display = 'flex';
+      cidView.style.display  = 'none';
+    } else if (label.indexOf('Kolkata') !== -1) {
+      mainView.style.display = 'none';
+      logiView.style.display = 'none';
+      cidView.style.display  = 'flex';
+    } else {
+      mainView.style.display = '';
+      logiView.style.display = 'none';
+      cidView.style.display  = 'none';
+    }
+  });
+});
+
+/* ── HAMBURGER MENU (both views) ─────────────────────────────── */
+document.querySelectorAll('.mhdr-menu').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelector('.app').classList.toggle('sidebar-collapsed');
+  });
+});
+
+/* ── CHECK NOW → Monthly breakdown modal ─────────────────────── */
+document.querySelector('.chip.orange').addEventListener('click', function() {
+  const rows = [
+    ['Jun 2025', 38,  51,  89,  ''],
+    ['Jul 2025', 91,  7,   98,  ''],
+    ['Aug 2025', 37,  3,   40,  ''],
+    ['Sep 2025', 159, 0,   159, 'cid-row'],
+    ['Oct 2025', 19,  8,   27,  ''],
+    ['Nov 2025', 129, 52,  181, ''],
+    ['Dec 2025', 123, 28,  151, ''],
+    ['Jan 2026', 219, 24,  243, ''],
+    ['Feb 2026', 175, 32,  207, ''],
+    ['Mar 2026', 147, 62,  209, ''],
+    ['Apr 2026', 171, 25,  196, ''],
+    ['May 2026', 77,  30,  107, ''],
+  ];
+  const tableRows = rows.map(([m, ic, cs, tot, cls]) =>
+    `<tr class="${cls}">
+      <td>${m}${cls ? ' &nbsp;📍 Kolkata CID' : ''}</td>
+      <td class="num">${ic}</td>
+      <td class="num">${cs}</td>
+      <td class="num" style="color:var(--navy);font-weight:800">${tot}</td>
+    </tr>`
+  ).join('');
+  openModal(`
+    <div class="modal-title">Monthly Activity Breakdown</div>
+    <div class="modal-sub">iCognative & Calm Sync sessions · June 2025 – May 2026</div>
+    <table class="mtable">
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th style="text-align:right">iCognative</th>
+          <th style="text-align:right">Calm Sync</th>
+          <th style="text-align:right">Monthly Total</th>
+        </tr>
+      </thead>
+      <tbody>${tableRows}</tbody>
+      <tfoot>
+        <tr style="background:#F8FAFD">
+          <td style="font-weight:800;color:#1B3461">Grand Total</td>
+          <td class="num" style="color:#1B3461;font-weight:800">1,300+</td>
+          <td class="num" style="color:#F5A623;font-weight:800">500+</td>
+          <td class="num" style="color:#1B3461;font-weight:900;font-size:14px">1,900+</td>
+        </tr>
+      </tfoot>
+    </table>
+    <div style="margin-top:14px;font-size:10px;color:#A8BDCF">📍 Sep 2025 highlighted = Kolkata CID Deployment peak</div>
+  `);
+});
+
+/* ── VIEW FULL REPORT → Platform distribution modal ─────────── */
+document.querySelector('.btn-orange').addEventListener('click', function() {
+  const activities = [
+    { name: 'iCognative (Stage · QA · Prod · CID)', count: 1300, color: '#1B3461', pct: 56.5 },
+    { name: 'Calm Sync (Web · Android · iOS)',       count: 500,  color: '#F5A623', pct: 21.7 },
+    { name: 'Manual Annotations',                   count: 341,  color: '#2980B9', pct: 14.8 },
+    { name: 'iCognative Mini (Web & Android)',       count: 50,   color: '#4A7EBB', pct: 2.2  },
+    { name: "My I'd Sessions",                      count: 50,   color: '#A8BDCF', pct: 2.2  },
+    { name: 'Brain ID Sessions',                    count: 29,   color: '#27AE60', pct: 1.3  },
+    { name: 'Depression Tests',                     count: 32,   color: '#9B59B6', pct: 1.4  },
+  ];
+  const rows = activities.map(p => `
+    <div class="plat-row">
+      <div class="plat-label" style="display:flex;align-items:center;gap:8px">
+        <span style="width:8px;height:8px;border-radius:2px;background:${p.color};flex-shrink:0;display:inline-block"></span>
+        ${p.name}
+      </div>
+      <div class="plat-bar-wrap">
+        <div class="plat-bar-fill" style="width:${p.pct}%;background:${p.color}"></div>
+      </div>
+      <div style="font-size:10px;color:#6B82A3;font-weight:600;width:36px;text-align:right">${p.pct}%</div>
+      <div class="plat-count" style="color:${p.color};width:48px;text-align:right">${p.count.toLocaleString()}</div>
+    </div>
+  `).join('');
+  openModal(`
+    <div class="modal-title">Full Activity Report</div>
+    <div class="modal-sub">All 7 tracked activities · June 2025 – May 2026 · Matches dashboard chart exactly</div>
+    <div class="modal-divider"></div>
+    ${rows}
+    <div class="modal-divider"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:12px;color:#6B82A3;font-weight:600">Grand Total — All Activities</div>
+        <div style="font-size:10px;color:#A8BDCF;margin-top:2px">1,300 + 500 + 341 + 50 + 50 + 29 + 32</div>
+      </div>
+      <div style="font-size:28px;font-weight:900;color:#1B3461;letter-spacing:-1px">2,302<span style="font-size:16px">+</span></div>
+    </div>
+  `);
+});
+
+/* ── CID BADGE ───────────────────────────────────────────────── */
+document.querySelector('.cid-badge').addEventListener('click', function() {
+  openModal(`
+    <div class="modal-title">🧠 iCognative — Kolkata CID Operations</div>
+    <div class="modal-sub">Bhawani Bhawan, Kolkata · Sep 2025 (+ repeat visit)</div>
+    <div class="modal-divider"></div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="padding:14px;background:#F8FAFD;border-left:3px solid #1B3461;border-radius:6px">
+        <div style="font-size:12px;font-weight:700;color:#1B3461;margin-bottom:4px">Investigative Case Execution</div>
+        <div style="font-size:11px;color:#6B82A3;line-height:1.6">20+ iCognative cases independently executed across 10 suspects. Full protocol compliance, live ERP monitoring, annotation review, and complete post-case documentation managed without supervisory oversight.</div>
+      </div>
+      <div style="padding:14px;background:#FFF6E5;border-left:3px solid #F5A623;border-radius:6px">
+        <div style="font-size:12px;font-weight:700;color:#1B3461;margin-bottom:4px">Sep 2025 — Peak Deployment Month</div>
+        <div style="font-size:11px;color:#6B82A3;line-height:1.6">159 iCognative tests conducted in September alone — the highest single-month deployment volume. This directly corresponds to the Kolkata CID operational period.</div>
+      </div>
+      <div style="padding:14px;background:#F8FAFD;border-left:3px solid #4A7EBB;border-radius:6px">
+        <div style="font-size:12px;font-weight:700;color:#1B3461;margin-bottom:4px">ERP Algorithm Product Impact</div>
+        <div style="font-size:11px;color:#6B82A3;line-height:1.6">Field-edge observations from CID sessions directly influenced ERP checking logic for the 4th, 6th, and 8th good targets — and threshold improvements in iCognative Stage. Operational insight converted into product improvement.</div>
+      </div>
+      <div style="padding:14px;background:#F8FAFD;border-left:3px solid #A8BDCF;border-radius:6px">
+        <div style="font-size:12px;font-weight:700;color:#1B3461;margin-bottom:4px">Documentation & Reporting</div>
+        <div style="font-size:11px;color:#6B82A3;line-height:1.6">Detailed case reports, POC sheets, and operational summaries prepared for every case — submitted to stakeholders independently with full traceability.</div>
+      </div>
+    </div>
+  `);
+});
+
+/* ── KPI CARDS ───────────────────────────────────────────────── */
+const kpiModals = [
+  {
+    sel: '.kpi-card.featured',
+    title: '🧠 iCognative Tests — 1,300+',
+    sub: 'Stage · QA · Production · Kolkata Domain · Full Year',
+    body: `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px">
+        <div style="padding:14px;background:#F0F3F7;border-radius:10px;text-align:center">
+          <div style="font-size:10px;color:#6B82A3;font-weight:600;text-transform:uppercase;letter-spacing:.7px">Stage Environment</div>
+          <div style="font-size:28px;font-weight:900;color:#1B3461;margin-top:4px">~600</div>
+        </div>
+        <div style="padding:14px;background:#F0F3F7;border-radius:10px;text-align:center">
+          <div style="font-size:10px;color:#6B82A3;font-weight:600;text-transform:uppercase;letter-spacing:.7px">QA Environment</div>
+          <div style="font-size:28px;font-weight:900;color:#1B3461;margin-top:4px">~400</div>
+        </div>
+        <div style="padding:14px;background:#F0F3F7;border-radius:10px;text-align:center">
+          <div style="font-size:10px;color:#6B82A3;font-weight:600;text-transform:uppercase;letter-spacing:.7px">Production</div>
+          <div style="font-size:28px;font-weight:900;color:#F5A623;margin-top:4px">~200</div>
+        </div>
+        <div style="padding:14px;background:#FFF6E5;border-radius:10px;text-align:center;border:1px solid rgba(245,166,35,.3)">
+          <div style="font-size:10px;color:#6B82A3;font-weight:600;text-transform:uppercase;letter-spacing:.7px">Kolkata Domain</div>
+          <div style="font-size:28px;font-weight:900;color:#F5A623;margin-top:4px">~100</div>
+        </div>
+      </div>
+      <div style="margin-top:16px;padding:12px 14px;background:#EEF4FF;border-radius:8px;font-size:11px;color:#1B3461;line-height:1.6">
+        Peak Month: <b>January 2026 — 219 tests</b>. CID Field Peak: <b>September 2025 — 159 tests</b>.
+      </div>`
+  },
+  {
+    sel: '.kpi-card:not(.featured)',
+    idx: 0,
+    title: '🌊 Calm Sync Sessions — 500+',
+    sub: 'Web · Android · iOS · Full Year',
+    body: `
+      <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px">
+        <div class="plat-row"><div class="plat-label">Web Platform</div><div class="plat-bar-wrap"><div class="plat-bar-fill" style="width:40%;background:#F5A623"></div></div><div class="plat-count" style="color:#F5A623">~120</div></div>
+        <div class="plat-row"><div class="plat-label">Android</div><div class="plat-bar-wrap"><div class="plat-bar-fill" style="width:35%;background:#F5A623"></div></div><div class="plat-count" style="color:#F5A623">~105</div></div>
+        <div class="plat-row"><div class="plat-label">iOS</div><div class="plat-bar-wrap"><div class="plat-bar-fill" style="width:25%;background:#F5A623"></div></div><div class="plat-count" style="color:#F5A623">~75</div></div>
+      </div>
+      <div style="margin-top:14px;padding:12px 14px;background:#FFF6E5;border-radius:8px;font-size:11px;color:#1B3461;line-height:1.6">
+        Peak months: <b>Jun 2025 (51)</b> and <b>Nov 2025 (52)</b>. Includes CMPDI Ranchi field collection, ISKCON event, and ongoing internal validation sessions.
+      </div>`
+  },
+  {
+    sel: '.kpi-card:not(.featured)',
+    idx: 1,
+    title: '📋 iCognative Mini — 50+',
+    sub: 'Web & Android · Feb 2026 onwards',
+    body: `
+      <div style="margin-top:16px;padding:14px;background:#EEF4FF;border-radius:10px;font-size:11px;color:#1B3461;line-height:1.7">
+        iCognative Mini testing commenced from <b>February 2026</b> onwards.<br><br>
+        <b>Web Platform:</b> ~28 sessions<br>
+        <b>Android:</b> ~22 sessions<br><br>
+        Full end-to-end validation of workflow, UX, and protocol execution across both platforms — covering functional testing, bug reporting, and stability assessment.
+      </div>`
+  },
+  {
+    sel: '.kpi-card:not(.featured)',
+    idx: 2,
+    title: "🪪 My I'd Sessions — 50+",
+    sub: 'Protocol Execution & Data Collection',
+    body: `
+      <div style="margin-top:16px;padding:14px;background:#EEF4FF;border-radius:10px;font-size:11px;color:#1B3461;line-height:1.7">
+        My I'd application sessions conducted in collaboration with <b>Santosh Sir and Nehra</b>.<br><br>
+        Activities included data collection, protocol execution, and validation of the biometric identity workflow across test subjects.<br><br>
+        Sessions contributed to internal product validation and research data requirements.
+      </div>`
+  }
+];
+
+/* attach to non-featured KPI cards in main view only */
+const nonFeaturedCards = document.querySelectorAll('.main .kpi-card:not(.featured)');
+nonFeaturedCards.forEach(function(card, i) {
+  card.style.cursor = 'pointer';
+  card.addEventListener('click', function() {
+    const d = kpiModals[i + 1];
+    if (!d) return;
+    openModal(`<div class="modal-title">${d.title}</div><div class="modal-sub">${d.sub}</div><div class="modal-divider"></div>${d.body}`);
+  });
+});
+
+/* featured KPI card in main view only */
+const featuredCard = document.querySelector('.main .kpi-card.featured');
+featuredCard.style.cursor = 'pointer';
+featuredCard.addEventListener('click', function() {
+  const d = kpiModals[0];
+  openModal(`<div class="modal-title">${d.title}</div><div class="modal-sub">${d.sub}</div><div class="modal-divider"></div>${d.body}`);
+});
+
+/* ── MAP PIN TOOLTIPS ────────────────────────────────────────── */
+document.querySelectorAll('.map-pin').forEach(function(pin) {
+  pin.addEventListener('mouseenter', function() {
+    var city    = this.getAttribute('data-city');
+    var hsets   = this.getAttribute('data-h');
+    var recip   = this.getAttribute('data-r');
+    var datevia = this.getAttribute('data-d');
+
+    /* find the solid (2nd) circle for positioning */
+    var circles = this.querySelectorAll('circle');
+    var solidC  = circles[circles.length - 1];  /* last circle = the filled pin */
+    var cx = parseFloat(solidC.getAttribute('cx'));
+    var cy = parseFloat(solidC.getAttribute('cy'));
+
+    var W = 220, H = 68;
+    var tx = (cx + 14 + W > 560) ? cx - W - 14 : cx + 14;
+    var ty = Math.max(4, cy - 20);
+    if (ty + H > 670) ty = 670 - H - 4;
+
+    var bg   = document.getElementById('tt-bg');
+    var ttC  = document.getElementById('tt-city');
+    var ttH  = document.getElementById('tt-headsets');
+    var ttR  = document.getElementById('tt-recip');
+    var ttD  = document.getElementById('tt-date');
+
+    bg.setAttribute('x', tx); bg.setAttribute('y', ty);
+    bg.setAttribute('width', W); bg.setAttribute('height', H);
+
+    ttC.setAttribute('x', tx + 10); ttC.setAttribute('y', ty + 18); ttC.textContent = city;
+    ttH.setAttribute('x', tx + 10); ttH.setAttribute('y', ty + 31); ttH.textContent = hsets;
+    ttR.setAttribute('x', tx + 10); ttR.setAttribute('y', ty + 44); ttR.textContent = recip;
+    ttD.setAttribute('x', tx + 10); ttD.setAttribute('y', ty + 57); ttD.textContent = datevia;
+
+    document.getElementById('map-tooltip').style.display = '';
+  });
+
+  pin.addEventListener('mouseleave', function() {
+    document.getElementById('map-tooltip').style.display = 'none';
+  });
+});
+</script>
+
+</body>
+</html>
